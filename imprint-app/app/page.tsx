@@ -22,7 +22,7 @@ type ConversationHandle = {
 const AGENT_PROMPTS: Record<string, string> = {
   strategist: strategistPrompt,
   creative: creativePrompt,
-  coach: coachPrompt,
+  guide: coachPrompt,   // sidebar uses id='guide', prompt is coachPrompt
 };
 
 export default function HomePage() {
@@ -72,7 +72,9 @@ export default function HomePage() {
   // ── Audio level monitor ────────────────────────────────────────────────────
   const startLevelMonitor = useCallback(async (stream: MediaStream) => {
     try {
-      const ctx = new AudioContext();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const AC = (window.AudioContext ?? (window as any).webkitAudioContext) as typeof AudioContext;
+      const ctx = new AC();
       audioContextRef.current = ctx;
 
       const analyser = ctx.createAnalyser();
