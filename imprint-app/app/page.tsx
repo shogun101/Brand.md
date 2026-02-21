@@ -112,7 +112,21 @@ export default function HomePage() {
         }
       };
 
-      recognition.onerror = () => setMicState('ERROR');
+      // Auto-restart on end — browser stops recognition after silence even with continuous:true
+      recognition.onend = () => {
+        const state = useSessionStore.getState();
+        if (state.appState === 'active') {
+          try { recognition.start(); } catch { /* already started */ }
+        }
+      };
+
+      recognition.onerror = (e: any) => {
+        // 'no-speech' and 'audio-capture' are non-fatal — keep listening
+        if (e.error === 'no-speech') return;
+        if (e.error === 'audio-capture') return;
+        setMicState('ERROR');
+      };
+
       recognition.start();
       conversationRef.current = { _recognition: recognition };
     },

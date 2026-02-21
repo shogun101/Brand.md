@@ -58,14 +58,7 @@ export default function HeroPanel({
           className="absolute inset-0 h-full w-[103.7%] max-w-none object-cover animate-avatar-breathe"
           style={{ left: '-1.88%', top: '-0.05%' }}
         />
-        {/* 3. Glow overlay — animation class swaps by state */}
-        <img
-          src="/images/hero-overlay.png"
-          alt=""
-          aria-hidden="true"
-          className={`absolute inset-0 size-full object-cover ${glowClass}`}
-          style={{ mixBlendMode: 'screen' }}
-        />
+        {/* Overlay removed — main figure renders clean */}
       </div>
 
       {/* Audio toggle */}
