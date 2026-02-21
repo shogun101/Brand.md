@@ -1,0 +1,245 @@
+@import "tailwindcss";
+
+/* ============================================================
+   FONT DECLARATIONS — Awesome Serif (OTF)
+   Upright (normal) + Italic variants
+   Weights: Light 300 / Regular 400 / Medium 500 / SemiBold 600
+   ============================================================ */
+
+@font-face {
+  font-family: "Awesome Serif";
+  src: url("/fonts/AwesomeSerif-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Awesome Serif";
+  src: url("/fonts/AwesomeSerif-LightRegular.otf") format("opentype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Awesome Serif";
+  src: url("/fonts/AwesomeSerif-MediumRegular.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Awesome Serif";
+  src: url("/fonts/AwesomeSerif-SemiBoldRegular.otf") format("opentype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Awesome Serif";
+  src: url("/fonts/AwesomeSerifItalic-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Awesome Serif";
+  src: url("/fonts/AwesomeSerifItalic-LightReg.otf") format("opentype");
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Awesome Serif";
+  src: url("/fonts/AwesomeSerifItalic-MedRegular.otf") format("opentype");
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Awesome Serif";
+  src: url("/fonts/AwesomeSerifItalic-SmRegular.otf") format("opentype");
+  font-weight: 600;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ============================================================
+   TAILWIND THEME EXTENSION
+   ============================================================ */
+
+@theme {
+  /* Fonts */
+  --font-awesome-serif: "Awesome Serif", Georgia, "Times New Roman", serif;
+  --font-inter: "Inter", system-ui, -apple-system, sans-serif;
+
+  /* Brand Colors */
+  --color-brand-dark: #010506;
+  --color-brand-surface: #020607;
+  --color-brand-panel: #0f0f0f;
+  --color-brand-sidebar: #1c1c1c;
+  --color-brand-accent: #d97706;
+  --color-brand-success: #46a758;
+
+  /* Neutral Palette */
+  --color-neutral-50: #ededed;
+  --color-neutral-100: #d4d4d4;
+  --color-neutral-200: #8e8e93;
+  --color-neutral-300: #525252;
+  --color-neutral-400: #444444;
+  --color-neutral-500: #3f3f3f;
+  --color-neutral-600: #333333;
+  --color-neutral-700: #2f2f2f;
+  --color-neutral-800: #2a2a2a;
+  --color-neutral-900: #131313;
+}
+
+/* ============================================================
+   GLOBAL RESETS
+   ============================================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background-color: var(--color-brand-dark);
+  color: var(--color-neutral-50);
+  font-family: var(--font-inter);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================================
+   CUSTOM SCROLLBAR (sidebar)
+   ============================================================ */
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-neutral-800);
+  border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--color-neutral-600);
+}
+
+/* ============================================================
+   AVATAR ANIMATIONS — Tier 1 CSS
+   ============================================================ */
+
+@keyframes avatar-breathe {
+  0%, 100% { transform: scale(1) translateY(0); }
+  50% { transform: scale(1.008) translateY(-2px); }
+}
+
+.animate-avatar-breathe {
+  animation: avatar-breathe 6s ease-in-out infinite;
+}
+
+@keyframes avatar-float {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(2px); }
+  75% { transform: translateX(-2px); }
+}
+
+.animate-avatar-float {
+  animation: avatar-float 8s ease-in-out infinite;
+}
+
+@keyframes glow-idle {
+  0%, 100% { opacity: 0.6; filter: brightness(1); }
+  50% { opacity: 0.75; filter: brightness(1.1); }
+}
+
+@keyframes glow-active {
+  0%, 100% { opacity: 0.8; filter: brightness(1.15); }
+  50% { opacity: 1; filter: brightness(1.3); }
+}
+
+@keyframes glow-speaking {
+  0% { opacity: 0.7; filter: brightness(1.1); }
+  30% { opacity: 0.95; filter: brightness(1.25); }
+  60% { opacity: 0.75; filter: brightness(1.1); }
+  100% { opacity: 0.7; filter: brightness(1.1); }
+}
+
+.animate-glow-idle { animation: glow-idle 4s ease-in-out infinite; }
+.animate-glow-active { animation: glow-active 1.5s ease-in-out infinite; }
+.animate-glow-speaking { animation: glow-speaking 2s ease-in-out infinite; }
+
+/* ============================================================
+   MIC BARS ANIMATION
+   ============================================================ */
+
+@keyframes bar-bounce {
+  0%, 100% { height: 6px; }
+  50% { height: 14px; }
+}
+
+.animate-bar-1 { animation: bar-bounce 0.6s ease-in-out infinite; }
+.animate-bar-2 { animation: bar-bounce 0.6s ease-in-out infinite 0.1s; }
+.animate-bar-3 { animation: bar-bounce 0.6s ease-in-out infinite 0.2s; }
+.animate-bar-4 { animation: bar-bounce 0.6s ease-in-out infinite 0.3s; }
+
+/* ============================================================
+   TYPING / CURSOR ANIMATION
+   ============================================================ */
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.animate-blink {
+  animation: blink 0.8s ease-in-out infinite;
+}
+
+/* ============================================================
+   SHIMMER SKELETON
+   ============================================================ */
+
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, #2a2a2a 0%, #333 20%, #2a2a2a 40%, #2a2a2a 100%);
+  background-size: 400px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ============================================================
+   DOTS PULSE (PROCESSING STATE)
+   ============================================================ */
+
+@keyframes dot-pulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+.animate-dot-1 { animation: dot-pulse 1.2s ease-in-out infinite; }
+.animate-dot-2 { animation: dot-pulse 1.2s ease-in-out infinite 0.2s; }
+.animate-dot-3 { animation: dot-pulse 1.2s ease-in-out infinite 0.4s; }
