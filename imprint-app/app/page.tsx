@@ -29,6 +29,7 @@ export default function HomePage() {
   const router = useRouter();
   const conversationRef = useRef<ConversationHandle | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const sessionActiveRef = useRef(false);
 
   const {
     state,
@@ -114,8 +115,7 @@ export default function HomePage() {
 
       // Auto-restart on end — browser stops recognition after silence even with continuous:true
       recognition.onend = () => {
-        const state = useSessionStore.getState();
-        if (state.appState === 'active') {
+        if (sessionActiveRef.current) {
           try { recognition.start(); } catch { /* already started */ }
         }
       };
@@ -134,6 +134,7 @@ export default function HomePage() {
   );
 
   const handleStartSession = useCallback(async () => {
+    sessionActiveRef.current = true;
     setState('active');
     setMicState('READY');
     startTimer();
@@ -164,6 +165,7 @@ export default function HomePage() {
             stopTimer();
             if (elapsed >= 5) {
               // Normal session end
+              sessionActiveRef.current = false;
               setState('complete');
               setMicState('READY');
             } else {
@@ -195,6 +197,7 @@ export default function HomePage() {
   ]);
 
   const handleEndSession = useCallback(async () => {
+    sessionActiveRef.current = false;
     stopTimer();
     const conv = conversationRef.current;
     if (conv?.endSession) {
