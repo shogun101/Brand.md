@@ -9,6 +9,8 @@ interface HeroPanelProps {
   agentName?: string;
   appState: AppState;
   micState: MicState;
+  micError?: string | null;
+  audioLevel?: number;
   audioEnabled: boolean;
   onStartSession?: () => void;
   onToggleAudio?: () => void;
@@ -18,6 +20,8 @@ export default function HeroPanel({
   agentName = 'STRATEGIST',
   appState,
   micState,
+  micError,
+  audioLevel = 0,
   audioEnabled,
   onStartSession,
   onToggleAudio,
@@ -30,38 +34,29 @@ export default function HeroPanel({
       ? 'rgba(217,119,6,0.1)'
       : 'rgba(255,255,255,0.02)';
 
-  // Glow overlay animation class by mic state
-  const glowClass =
-    appState === 'idle'
-      ? 'animate-glow-idle'
-      : micState === 'AI_SPEAKING'
-      ? 'animate-glow-speaking'
-      : 'animate-glow-active';
-
   const showComplete = appState === 'complete';
 
   return (
     <div className="relative h-full overflow-hidden border-r border-neutral-800 bg-brand-panel">
-      {/* 1. Radial halo */}
+      {/* 1. Radial halo — z-1, behind the figure */}
       <div
-        className="absolute inset-0 z-[1] transition-all duration-1000"
+        className="pointer-events-none absolute inset-0 z-[1] transition-all duration-1000"
         style={{
           background: `radial-gradient(circle at 50% 50%, ${haloColor}, transparent 70%)`,
         }}
       />
 
-      {/* 2. Figure image with breathing */}
-      <div className="absolute inset-0">
+      {/* 2. Figure image — z-2, above halo */}
+      <div className="absolute inset-0 z-[2]">
         <img
           src="/images/hero-figure.png"
           alt="AI Strategist figure"
           className="absolute inset-0 h-full w-[103.7%] max-w-none object-cover animate-avatar-breathe"
           style={{ left: '-1.88%', top: '-0.05%' }}
         />
-        {/* Overlay removed — main figure renders clean */}
       </div>
 
-      {/* Audio toggle */}
+      {/* Audio toggle — z-20 */}
       <button
         onClick={onToggleAudio}
         className="absolute bottom-8 left-8 z-20 flex size-8 items-center justify-center rounded-full border border-neutral-600 bg-[rgba(37,37,37,0.5)] text-neutral-200 backdrop-blur-sm transition-opacity hover:opacity-80"
@@ -82,11 +77,13 @@ export default function HeroPanel({
         )}
       </button>
 
-      {/* 5. Floating bar or Mic indicator or Complete pill */}
+      {/* UI overlays — z-20 */}
       {appState === 'idle' && (
         <FloatingBar agentName={agentName} onStartSession={onStartSession} />
       )}
-      {appState === 'active' && <MicIndicator micState={micState} />}
+      {appState === 'active' && (
+        <MicIndicator micState={micState} micError={micError} audioLevel={audioLevel} />
+      )}
       {showComplete && (
         <FloatingBar label="Session Complete ✓" />
       )}

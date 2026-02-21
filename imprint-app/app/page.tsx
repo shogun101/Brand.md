@@ -31,6 +31,12 @@ export default function HomePage() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const sessionActiveRef = useRef(false);
 
+  // Audio level monitoring refs
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const levelStreamRef = useRef<MediaStream | null>(null);
+  const levelAnimRef = useRef<number | null>(null);
+
   const {
     state,
     setState,
@@ -38,12 +44,16 @@ export default function HomePage() {
     selectedModules,
     micState,
     setMicState,
+    micError,
+    setMicError,
     elapsedSeconds,
     tick,
     sections,
     addSection,
     audioEnabled,
     toggleAudio,
+    audioLevel,
+    setAudioLevel,
     reset,
   } = useSessionStore();
 
@@ -59,10 +69,59 @@ export default function HomePage() {
     }
   }, []);
 
-  useEffect(() => {
-    return () => stopTimer();
-  }, [stopTimer]);
+  // ── Audio level monitor ────────────────────────────────────────────────────
+  const startLevelMonitor = useCallback(async (stream: MediaStream) => {
+    try {
+      const ctx = new AudioContext();
+      audioContextRef.current = ctx;
 
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 256;
+      analyser.smoothingTimeConstant = 0.5;
+      analyserRef.current = analyser;
+
+      const source = ctx.createMediaStreamSource(stream);
+      source.connect(analyser);
+
+      const data = new Uint8Array(analyser.frequencyBinCount);
+
+      const loop = () => {
+        analyser.getByteFrequencyData(data);
+        const avg = data.reduce((a, b) => a + b, 0) / data.length;
+        setAudioLevel(avg / 128); // normalise to 0–1
+        levelAnimRef.current = requestAnimationFrame(loop);
+      };
+      loop();
+    } catch {
+      // Non-fatal — level monitor failed but session can continue
+    }
+  }, [setAudioLevel]);
+
+  const stopLevelMonitor = useCallback(() => {
+    if (levelAnimRef.current) {
+      cancelAnimationFrame(levelAnimRef.current);
+      levelAnimRef.current = null;
+    }
+    if (audioContextRef.current) {
+      audioContextRef.current.close().catch(() => {});
+      audioContextRef.current = null;
+    }
+    analyserRef.current = null;
+    if (levelStreamRef.current) {
+      levelStreamRef.current.getTracks().forEach((t) => t.stop());
+      levelStreamRef.current = null;
+    }
+    setAudioLevel(0);
+  }, [setAudioLevel]);
+
+  useEffect(() => {
+    return () => {
+      stopTimer();
+      stopLevelMonitor();
+    };
+  }, [stopTimer, stopLevelMonitor]);
+
+  // ── Browser SpeechRecognition fallback ────────────────────────────────────
   const useBrowserFallback = useCallback(
     (systemPrompt: string) => {
       if (typeof window === 'undefined') return;
@@ -70,7 +129,11 @@ export default function HomePage() {
       const Win = window as any;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const SR: (new () => any) | undefined = Win.SpeechRecognition || Win.webkitSpeechRecognition;
-      if (!SR) return;
+      if (!SR) {
+        setMicState('ERROR');
+        setMicError('Speech recognition not supported in this browser');
+        return;
+      }
 
       const recognition = new SR();
       recognition.continuous = true;
@@ -116,24 +179,58 @@ export default function HomePage() {
       // Auto-restart on end — browser stops recognition after silence even with continuous:true
       recognition.onend = () => {
         if (sessionActiveRef.current) {
-          try { recognition.start(); } catch { /* already started */ }
+          try { recognition.start(); } catch { /* already starting */ }
         }
       };
 
-      recognition.onerror = (e: any) => {
-        // 'no-speech' and 'audio-capture' are non-fatal — keep listening
-        if (e.error === 'no-speech') return;
-        if (e.error === 'audio-capture') return;
-        setMicState('ERROR');
+      recognition.onerror = (e: { error: string }) => {
+        if (e.error === 'no-speech') return;   // non-fatal — keep listening
+        if (e.error === 'audio-capture') {
+          setMicState('ERROR');
+          setMicError('Mic not detected — check your microphone is connected');
+          return;
+        }
+        if (e.error === 'not-allowed') {
+          setMicState('ERROR');
+          setMicError('Mic blocked — allow microphone access in browser settings');
+          return;
+        }
+        setMicState('LISTENING'); // other errors: stay ready
       };
 
       recognition.start();
       conversationRef.current = { _recognition: recognition };
     },
-    [addSection, setMicState]
+    [addSection, setMicState, setMicError]
   );
 
+  // ── Start session ─────────────────────────────────────────────────────────
   const handleStartSession = useCallback(async () => {
+    setMicError(null);
+
+    // Step 1: Request mic permission and start level monitor
+    let micStream: MediaStream | null = null;
+    try {
+      micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      levelStreamRef.current = micStream;
+      startLevelMonitor(micStream);
+    } catch (err: unknown) {
+      const name = (err as { name?: string })?.name ?? '';
+      if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
+        setMicState('ERROR');
+        setMicError('Mic blocked — allow microphone access in browser settings');
+      } else if (name === 'NotFoundError' || name === 'DevicesNotFoundError') {
+        setMicState('ERROR');
+        setMicError('No microphone found — plug one in and try again');
+      } else {
+        setMicState('ERROR');
+        setMicError('Could not access microphone');
+      }
+      setState('idle');
+      return;
+    }
+
+    // Step 2: Start session
     sessionActiveRef.current = true;
     setState('active');
     setMicState('READY');
@@ -164,12 +261,12 @@ export default function HomePage() {
             const elapsed = useSessionStore.getState().elapsedSeconds;
             stopTimer();
             if (elapsed >= 5) {
-              // Normal session end
               sessionActiveRef.current = false;
+              stopLevelMonitor();
               setState('complete');
               setMicState('READY');
             } else {
-              // Premature disconnect — ElevenLabs connection failed, try browser fallback
+              // Premature disconnect — fall back to browser SpeechRecognition
               setState('active');
               setMicState('LISTENING');
               useBrowserFallback(prompt);
@@ -190,15 +287,20 @@ export default function HomePage() {
     selectedAgent,
     setState,
     setMicState,
+    setMicError,
     startTimer,
     stopTimer,
+    stopLevelMonitor,
+    startLevelMonitor,
     addSection,
     useBrowserFallback,
   ]);
 
+  // ── End session ───────────────────────────────────────────────────────────
   const handleEndSession = useCallback(async () => {
     sessionActiveRef.current = false;
     stopTimer();
+    stopLevelMonitor();
     const conv = conversationRef.current;
     if (conv?.endSession) {
       await conv.endSession();
@@ -207,7 +309,7 @@ export default function HomePage() {
     }
     setState('complete');
     setMicState('READY');
-  }, [setState, setMicState, stopTimer]);
+  }, [setState, setMicState, stopTimer, stopLevelMonitor]);
 
   const handleNewSession = useCallback(() => {
     reset();
@@ -234,6 +336,8 @@ export default function HomePage() {
             agentName={agentDisplayName}
             appState={state}
             micState={micState}
+            micError={micError}
+            audioLevel={audioLevel}
             audioEnabled={audioEnabled}
             onStartSession={handleStartSession}
             onToggleAudio={toggleAudio}

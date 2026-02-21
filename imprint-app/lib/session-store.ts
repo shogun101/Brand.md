@@ -22,6 +22,8 @@ interface SessionStore {
   setBrandName: (n: string) => void;
   micState: MicState;
   setMicState: (m: MicState) => void;
+  micError: string | null;
+  setMicError: (e: string | null) => void;
   elapsedSeconds: number;
   tick: () => void;
 
@@ -57,6 +59,8 @@ export const useSessionStore = create<SessionStore>((set) => ({
   setBrandName: (n) => set({ brandName: n }),
   micState: 'READY',
   setMicState: (m) => set({ micState: m }),
+  micError: null,
+  setMicError: (e) => set({ micError: e }),
   elapsedSeconds: 0,
   tick: () => set((s) => ({ elapsedSeconds: s.elapsedSeconds + 1 })),
 
@@ -87,6 +91,7 @@ export const useSessionStore = create<SessionStore>((set) => ({
       sessionId: null,
       brandName: '',
       micState: 'READY',
+      micError: null,
       elapsedSeconds: 0,
       sections: {},
       audioLevel: 0,
