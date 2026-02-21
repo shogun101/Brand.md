@@ -128,6 +128,7 @@ export default function HomePage() {
 
     try {
       const conversation = await startConversation({
+        agentKey: selectedAgent,
         systemPrompt: prompt,
         onMessage: (msg) => {
           if (msg.source === 'ai') {

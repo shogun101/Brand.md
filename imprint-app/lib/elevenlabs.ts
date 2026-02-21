@@ -2,6 +2,7 @@
 import { Conversation } from '@11labs/client';
 
 export interface ElevenLabsConfig {
+  agentKey?: string; // 'strategist' | 'creative' | 'guide'
   systemPrompt: string;
   onMessage: (message: { message: string; source: string }) => void;
   onModeChange: (mode: { mode: string }) => void;
@@ -11,22 +12,17 @@ export interface ElevenLabsConfig {
 }
 
 export async function startConversation(config: ElevenLabsConfig) {
-  const res = await fetch('/api/elevenlabs/signed-url');
+  const agent = config.agentKey || 'strategist';
+  const res = await fetch(`/api/elevenlabs/signed-url?agent=${agent}`);
   const data = await res.json();
 
   if (!data.signedUrl) {
     throw new Error('Failed to get signed URL');
   }
 
+  // Note: system prompts are baked into each agent — no overrides needed
   const conversation = await Conversation.startSession({
     signedUrl: data.signedUrl,
-    overrides: {
-      agent: {
-        prompt: {
-          prompt: config.systemPrompt,
-        },
-      },
-    },
     onMessage: config.onMessage,
     onModeChange: config.onModeChange,
     onStatusChange: config.onStatusChange,
