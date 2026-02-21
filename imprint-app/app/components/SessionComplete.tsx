@@ -48,9 +48,9 @@ export default function SessionComplete({ sections, onNewSession }: SessionCompl
         </div>
         <button
           onClick={handleDownload}
-          className="flex h-[40px] items-center justify-center rounded-[20px] bg-brand-accent px-5 font-inter text-[13.3px] font-medium text-black transition-opacity hover:opacity-90"
+          className="flex h-[40px] items-center justify-center rounded-[20px] bg-brand-accent px-5 font-inter text-[13.3px] font-medium text-black transition-opacity hover:opacity-90 whitespace-nowrap"
         >
-          Download Files
+          Download brand.md
         </button>
       </div>
 

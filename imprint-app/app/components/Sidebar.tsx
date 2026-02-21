@@ -102,7 +102,7 @@ export default function Sidebar({ onStartSession, onAgentChange, onModulesChange
           <h2 className="font-inter text-[11.2px] font-semibold uppercase tracking-[0.56px] text-neutral-300">
             Select Agent
           </h2>
-          <div className="flex gap-3">
+          <div className="flex gap-2 overflow-x-auto pb-1">
             {AGENTS.map((agent) => (
               <AgentCard
                 key={agent.id}

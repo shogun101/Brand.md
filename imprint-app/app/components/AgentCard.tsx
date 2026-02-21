@@ -20,7 +20,7 @@ export default function AgentCard({
   return (
     <button
       onClick={onClick}
-      className={`relative h-[137px] w-[120px] shrink-0 overflow-hidden rounded-3xl border transition-all ${
+      className={`relative h-[128px] w-[100px] shrink-0 overflow-hidden rounded-3xl border transition-all ${
         selected
           ? 'border-white/30 shadow-[0_0_20px_rgba(255,255,255,0.08)]'
           : 'border-neutral-800 hover:border-neutral-600'

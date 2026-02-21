@@ -145,12 +145,24 @@ export default function HomePage() {
           if (status === 'connecting') setMicState('READY');
           if (status === 'connected') setMicState('LISTENING');
           if (status === 'disconnected') {
-            setMicState('READY');
+            const elapsed = useSessionStore.getState().elapsedSeconds;
             stopTimer();
-            setState('complete');
+            if (elapsed >= 5) {
+              // Normal session end
+              setState('complete');
+              setMicState('READY');
+            } else {
+              // Premature disconnect — ElevenLabs connection failed, try browser fallback
+              setState('active');
+              setMicState('LISTENING');
+              useBrowserFallback(prompt);
+            }
           }
         },
-        onError: (_msg: string) => setMicState('ERROR'),
+        onError: (_msg: string) => {
+          setMicState('LISTENING');
+          useBrowserFallback(prompt);
+        },
       });
       conversationRef.current = conversation;
     } catch {
