@@ -3,8 +3,8 @@ import { useEffect, useRef } from 'react';
 import { useSessionStore } from '@/lib/session-store';
 
 // Volume targets per state
-const VOL_IDLE     = 0.35;  // audible ambient on home screen
-const VOL_ACTIVE   = 0.10;  // subtle during session
+const VOL_IDLE     = 0.20;  // audible ambient on home screen
+const VOL_ACTIVE   = 0.08;  // subtle during session
 const VOL_SPEAKING = 0.03;  // near-silent when agent is talking
 const VOL_OFF      = 0;
 
