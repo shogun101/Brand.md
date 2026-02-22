@@ -1,9 +1,19 @@
 'use client';
 import { Conversation } from '@11labs/client';
+import { MODULE_PROMPTS } from '@/lib/prompts/modules';
+import { strategistPrompt } from '@/lib/prompts/strategist';
+import { creativePrompt } from '@/lib/prompts/creative';
+import { coachPrompt } from '@/lib/prompts/coach';
+
+const AGENT_BASE_PROMPTS: Record<string, string> = {
+  strategist: strategistPrompt,
+  creative:   creativePrompt,
+  guide:      coachPrompt,
+};
 
 export interface ElevenLabsConfig {
-  agentKey?: string; // 'strategist' | 'creative' | 'guide'
-  moduleKey?: string; // 'positioning' | 'voice-tone' | 'persona' | 'vision-values'
+  agentKey?: string;   // 'strategist' | 'creative' | 'guide'
+  moduleKey?: string;  // 'positioning' | 'voice-tone' | 'persona' | 'vision-values'
   systemPrompt: string;
   onMessage: (message: { message: string; source: string }) => void;
   onModeChange: (mode: { mode: string }) => void;
@@ -14,17 +24,27 @@ export interface ElevenLabsConfig {
 
 export async function startConversation(config: ElevenLabsConfig) {
   const agent = config.agentKey || 'strategist';
-  const moduleParam = config.moduleKey ? `&module=${encodeURIComponent(config.moduleKey)}` : '';
-  const res = await fetch(`/api/elevenlabs/signed-url?agent=${agent}${moduleParam}`);
+  const res = await fetch(`/api/elevenlabs/signed-url?agent=${agent}`);
   const data = await res.json();
 
   if (!data.signedUrl) {
     throw new Error('Failed to get signed URL');
   }
 
-  // Note: system prompts are baked into each agent — no overrides needed
+  // Build override: agent base prompt + module question flow
+  const basePrompt = AGENT_BASE_PROMPTS[agent] || strategistPrompt;
+  const modulePrompt = config.moduleKey ? MODULE_PROMPTS[config.moduleKey] : undefined;
+  const fullPrompt = modulePrompt
+    ? `${basePrompt}\n\n${modulePrompt}`
+    : basePrompt;
+
   const conversation = await Conversation.startSession({
     signedUrl: data.signedUrl,
+    overrides: {
+      agent: {
+        prompt: { prompt: fullPrompt },
+      },
+    },
     onMessage: config.onMessage,
     onModeChange: config.onModeChange,
     onStatusChange: config.onStatusChange,
