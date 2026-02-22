@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef, useCallback, useState } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSessionStore } from '@/lib/session-store';
 import { startConversation, parseSectionUpdates } from '@/lib/elevenlabs';
@@ -33,7 +33,6 @@ const AGENT_AVATARS: Record<string, string> = {
 
 export default function HomePage() {
   const router = useRouter();
-  const [isPaused, setIsPaused] = useState(false);
   const conversationRef = useRef<ConversationHandle | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const sessionActiveRef = useRef(false);
@@ -315,27 +314,22 @@ export default function HomePage() {
 
   // ── Pause session ─────────────────────────────────────────────────────────
   // Mutes mic input and stops SR auto-restart. ElevenLabs connection stays alive.
+  // State remains 'active' — user can still End properly afterward.
   const handlePauseSession = useCallback(() => {
+    // Stop SpeechRecognition auto-restart loop (fallback path)
     sessionActiveRef.current = false;
     const conv = conversationRef.current;
     if (conv?._recognition) {
       conv._recognition.stop();
     }
+    // Stop mic level monitor (releases the visualization stream)
     stopLevelMonitor();
+    // Pause timer
     stopTimer();
+    // Signal paused in MicIndicator — READY = not actively listening
     setMicState('READY');
-    setIsPaused(true);
+    // ElevenLabs conv intentionally NOT disconnected — session stays alive
   }, [stopLevelMonitor, stopTimer, setMicState]);
-
-  // ── Resume session ────────────────────────────────────────────────────────
-  // Restarts mic input after a pause. ElevenLabs session was never disconnected.
-  const handleResumeSession = useCallback(() => {
-    setIsPaused(false);
-    sessionActiveRef.current = true;
-    setMicState('LISTENING');
-    // Restart timer from where it left off
-    startTimer();
-  }, [setMicState, startTimer]);
 
   // ── End session ───────────────────────────────────────────────────────────
   // Full disconnect: ElevenLabs + SR fallback both stopped. Goes to 'complete'.
@@ -345,7 +339,6 @@ export default function HomePage() {
     sessionActiveRef.current = false;
     stopTimer();
     stopLevelMonitor();
-    setIsPaused(false);
     const conv = conversationRef.current;
     if (conv?.endSession) {
       await conv.endSession();
@@ -408,9 +401,7 @@ export default function HomePage() {
               sections={sections}
               transcript={transcript}
               elapsedSeconds={elapsedSeconds}
-              isPaused={isPaused}
               onPause={handlePauseSession}
-              onResume={handleResumeSession}
               onEnd={handleEndSession}
               expectedSections={selectedModules.map((_, i) => `section-${i}`)}
             />
