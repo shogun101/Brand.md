@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { PauseIcon, StopCircleIcon } from '@heroicons/react/24/solid';
+import { PauseIcon, StopCircleIcon, PlayIcon } from '@heroicons/react/24/solid';
 import { Message } from './ui/message';
 import { useSessionStore } from '@/lib/session-store';
 import type { TranscriptEntry } from '@/lib/session-store';
@@ -20,7 +20,9 @@ interface LiveDocumentProps {
   sections: Record<string, SectionData>;
   transcript: TranscriptEntry[];
   elapsedSeconds: number;
+  isPaused?: boolean;
   onPause?: () => void;
+  onResume?: () => void;
   onEnd?: () => void;
   expectedSections?: string[];
 }
@@ -75,7 +77,9 @@ export default function LiveDocument({
   sections,
   transcript,
   elapsedSeconds,
+  isPaused = false,
   onPause,
+  onResume,
   onEnd,
 }: LiveDocumentProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -112,13 +116,15 @@ export default function LiveDocument({
 
         {/* Fix 5 + 7: vertically centered buttons, icons match text size */}
         <div className="flex items-center gap-2">
-          {onPause && (
+          {(onPause || onResume) && (
             <button
-              onClick={onPause}
+              onClick={isPaused ? onResume : onPause}
               className="flex h-8 items-center gap-1.5 justify-center rounded-full border border-[#3f3f3f] px-3 font-inter text-[12px] text-neutral-300 transition-opacity hover:opacity-70"
             >
-              <PauseIcon className="w-3 h-3" />
-              Pause
+              {isPaused
+                ? <><PlayIcon className="w-3 h-3" />Resume</>
+                : <><PauseIcon className="w-3 h-3" />Pause</>
+              }
             </button>
           )}
           {onEnd && (

@@ -79,8 +79,8 @@ export default function SessionComplete({ sections, onNewSession }: SessionCompl
     <div className="flex h-full flex-col bg-brand-surface">
 
       {/* ── Header ── px-8 pt-8 pb-4 */}
-      <div className="flex items-center justify-between border-b border-neutral-800 px-8 py-6">
-        <div>
+      <div className="flex items-center gap-8 border-b border-neutral-800 px-8 py-6">
+        <div className="flex-1 min-w-0">
           <h2 className="font-awesome-serif text-[24px] tracking-[-0.48px] text-neutral-50">
             Session Complete
           </h2>
