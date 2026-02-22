@@ -37,7 +37,7 @@ export default function ModuleItem({ label, duration, description, checked, onCh
         <div className="flex flex-col">
           <span className="font-inter text-[14.4px] font-normal text-neutral-50">{label}</span>
           {description && (
-            <p className="font-inter text-[11px] text-neutral-500 leading-tight mt-0.5">{description}</p>
+            <p className="font-inter text-[11px] text-[#8E8E93] leading-tight mt-0.5">{description}</p>
           )}
         </div>
       </div>
