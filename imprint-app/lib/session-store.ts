@@ -8,6 +8,14 @@ interface SectionData {
   content: string;
 }
 
+export interface KitData {
+  tagline: string;
+  sections: Array<{ id: string; title: string; content: string }>;
+  agent_directives: string;
+  retrieval_rules: Record<string, string[]>;
+  usage_prompts: string[];
+}
+
 export interface TranscriptEntry {
   id: string;
   role: 'user' | 'ai';
@@ -52,6 +60,12 @@ interface SessionStore {
   /** Plan A: true while GPT-4o is generating sections from transcript */
   isGenerating: boolean;
   setGenerating: (v: boolean) => void;
+
+  /** Brand kit expansion */
+  kitData: KitData | null;
+  setKitData: (data: KitData) => void;
+  isGeneratingKit: boolean;
+  setGeneratingKit: (v: boolean) => void;
 
   reset: () => void;
 }
@@ -114,6 +128,11 @@ export const useSessionStore = create<SessionStore>((set) => ({
   isGenerating: false,
   setGenerating: (v) => set({ isGenerating: v }),
 
+  kitData: null,
+  setKitData: (data) => set({ kitData: data }),
+  isGeneratingKit: false,
+  setGeneratingKit: (v) => set({ isGeneratingKit: v }),
+
   reset: () =>
     set({
       state: 'idle',
@@ -128,5 +147,7 @@ export const useSessionStore = create<SessionStore>((set) => ({
       transcript: [],
       audioLevel: 0,
       isGenerating: false,
+      kitData: null,
+      isGeneratingKit: false,
     }),
 }));

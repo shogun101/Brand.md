@@ -11,6 +11,13 @@ const AGENT_BASE_PROMPTS: Record<string, string> = {
   guide:      coachPrompt,
 };
 
+const MODULE_FIRST_MESSAGES: Record<string, string> = {
+  'positioning':   "Brand Positioning — what are you building? More you share, the better. End this whenever you want.",
+  'voice-tone':    "Voice and Tone — how does your brand sound, or how do you want it to? More you share, the better. End this whenever.",
+  'persona':       "Brand Persona — who are you building for? More you share, the better. End this whenever.",
+  'vision-values': "Vision and Values — picture your brand as a person: how they look, how they carry themselves, how they talk. Where are they taking things? More you share, the better. End this whenever.",
+};
+
 export interface ElevenLabsConfig {
   agentKey?: string;   // 'strategist' | 'creative' | 'guide'
   moduleKey?: string;  // 'positioning' | 'voice-tone' | 'persona' | 'vision-values'
@@ -40,11 +47,15 @@ export async function startConversation(config: ElevenLabsConfig) {
     ? `${basePrompt}\n\n${modulePrompt}`
     : basePrompt;
 
+  const moduleKey = config.moduleKey || 'positioning';
+  const firstMessage = MODULE_FIRST_MESSAGES[moduleKey] ?? MODULE_FIRST_MESSAGES['positioning'];
+
   const conversation = await Conversation.startSession({
     signedUrl: data.signedUrl,
     overrides: {
       agent: {
         prompt: { prompt: fullPrompt },
+        firstMessage: firstMessage,
       },
     },
     onMessage: config.onMessage,

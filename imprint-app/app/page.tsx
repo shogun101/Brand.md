@@ -67,7 +67,7 @@ export default function HomePage() {
     audioLevel,
     setAudioLevel,
     isGenerating,
-    setGenerating,
+    isGeneratingKit,
     reset,
   } = useSessionStore();
 
@@ -283,13 +283,14 @@ export default function HomePage() {
         // ── Plan B PRIMARY: parse sections from streaming tentative responses ──
         // ElevenLabs streams the LLM output via onDebug before finalizing.
         // The <section_update> blocks appear here even if stripped from agent_response.
-        onDebug: (event) => {
-          if (event?.type === 'tentative_agent_response' && typeof event.response === 'string') {
-            console.log('[ElevenLabs tentative]', event.response.substring(0, 400));
-            const updates = parseSectionUpdates(event.response);
+        onDebug: (debug) => {
+          if (debug.type === 'tentative_agent_response') {
+            const text = debug.response || debug.text || '';
+            console.log('[tentative]', text.substring(0, 150));
+            const updates = parseSectionUpdates(text);
             if (updates.length > 0) {
-              console.log('[ElevenLabs tentative] sections found:', updates);
-              updates.forEach((u) =>
+              console.log('[sections found]', updates.map((u: { section: string }) => u.section));
+              updates.forEach((u: { section: string; title: string; content: string }) =>
                 addSection(u.section, { title: u.title, content: u.content })
               );
             }
@@ -300,6 +301,7 @@ export default function HomePage() {
           if (mode === 'speaking') setMicState('AI_SPEAKING');
         },
         onStatusChange: ({ status }) => {
+          console.log('[status change]', status);
           if (status === 'connecting') setMicState('READY');
           if (status === 'connected') setMicState('LISTENING');
           if (status === 'disconnected') {
@@ -393,46 +395,36 @@ export default function HomePage() {
     }
     setMicState('READY');
 
-    // ── Plan A: GPT-4o fallback ───────────────────────────────────────────
-    // If no sections were captured during the live session (Plan B didn't fire)
-    // but we have transcript content, auto-generate sections from GPT-4o.
+    // ── Generate full brand kit via GPT-4o ────────────────────────────────
+    // Always run kit generation when a session ends. Show SessionComplete
+    // immediately in loading state, then fill in the kit when ready.
     const storeState = useSessionStore.getState();
-    const hasSections = Object.keys(storeState.sections).length > 0;
-    const hasTranscript = storeState.transcript.length > 0;
-
-    if (!hasSections && hasTranscript) {
-      // Show SessionComplete immediately so user sees the panel (loading state)
-      setState('complete');
-      storeState.setGenerating(true);
-      try {
-        const res = await fetch('/api/generate-sections', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            transcript: storeState.transcript.map((e) => ({
-              source: e.role,
-              message: e.text,
-            })),
-            moduleKey: storeState.selectedModules[0] || 'positioning',
-            agentKey: storeState.selectedAgent,
-            brandName: storeState.brandName,
-          }),
-        });
-        const data: { sections?: Record<string, { title: string; content: string }> } =
-          await res.json();
-        if (data.sections) {
-          console.log('[Plan A] GPT-4o generated sections:', Object.keys(data.sections));
-          Object.entries(data.sections).forEach(([slug, section]) => {
-            useSessionStore.getState().addSection(slug, section);
-          });
-        }
-      } catch (e) {
-        console.error('[Plan A] Section generation failed:', e);
-      } finally {
-        useSessionStore.getState().setGenerating(false);
+    setState('complete');
+    storeState.setGeneratingKit(true);
+    try {
+      const res = await fetch('/api/generate-kit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sections: storeState.sections,
+          transcript: storeState.transcript.map((e) => ({
+            source: e.role,
+            message: e.text,
+          })),
+          moduleKey: storeState.selectedModules[0] || 'positioning',
+          agentKey: storeState.selectedAgent,
+          brandName: storeState.brandName,
+        }),
+      });
+      const data = await res.json();
+      if (data.kit) {
+        console.log('[kit] Generated successfully:', Object.keys(data.kit));
+        storeState.setKitData(data.kit);
       }
-    } else {
-      setState('complete');
+    } catch (e) {
+      console.error('[kit] Generation failed:', e);
+    } finally {
+      storeState.setGeneratingKit(false);
     }
   }, [setState, setMicState, stopTimer, stopLevelMonitor]);
   // Keep the forward ref in sync so handleStartSession always calls the latest version
@@ -503,6 +495,7 @@ export default function HomePage() {
             <SessionComplete
               sections={sections}
               isGenerating={isGenerating}
+              isGeneratingKit={isGeneratingKit}
               onNewSession={handleNewSession}
             />
           )}
