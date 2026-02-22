@@ -252,6 +252,7 @@ export default function HomePage() {
     try {
       const conversation = await startConversation({
         agentKey: selectedAgent,
+        moduleKey: selectedModules[0] || undefined,
         systemPrompt: prompt,
         onMessage: (msg) => {
           // Strip <section_update> blocks before adding to transcript

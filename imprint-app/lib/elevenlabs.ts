@@ -3,6 +3,7 @@ import { Conversation } from '@11labs/client';
 
 export interface ElevenLabsConfig {
   agentKey?: string; // 'strategist' | 'creative' | 'guide'
+  moduleKey?: string; // 'positioning' | 'voice-tone' | 'persona' | 'vision-values'
   systemPrompt: string;
   onMessage: (message: { message: string; source: string }) => void;
   onModeChange: (mode: { mode: string }) => void;
@@ -13,7 +14,8 @@ export interface ElevenLabsConfig {
 
 export async function startConversation(config: ElevenLabsConfig) {
   const agent = config.agentKey || 'strategist';
-  const res = await fetch(`/api/elevenlabs/signed-url?agent=${agent}`);
+  const moduleParam = config.moduleKey ? `&module=${encodeURIComponent(config.moduleKey)}` : '';
+  const res = await fetch(`/api/elevenlabs/signed-url?agent=${agent}${moduleParam}`);
   const data = await res.json();
 
   if (!data.signedUrl) {
