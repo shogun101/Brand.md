@@ -25,6 +25,12 @@ const AGENT_PROMPTS: Record<string, string> = {
   guide: coachPrompt,   // sidebar uses id='guide', prompt is coachPrompt
 };
 
+const AGENT_AVATARS: Record<string, string> = {
+  strategist: '/images/hero-figure.png',
+  creative: '/images/hero-creative.png',
+  guide: '/images/hero-guide.png',
+};
+
 export default function HomePage() {
   const router = useRouter();
   const conversationRef = useRef<ConversationHandle | null>(null);
@@ -50,6 +56,8 @@ export default function HomePage() {
     tick,
     sections,
     addSection,
+    transcript,
+    addTranscript,
     audioEnabled,
     toggleAudio,
     audioLevel,
@@ -146,8 +154,9 @@ export default function HomePage() {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       recognition.onresult = async (event: any) => {
-        const transcript = event.results[event.results.length - 1][0].transcript;
-        messages.push({ role: 'user', content: transcript });
+        const spokenText = event.results[event.results.length - 1][0].transcript;
+        messages.push({ role: 'user', content: spokenText });
+        addTranscript('user', spokenText);
         setMicState('PROCESSING');
 
         try {
@@ -160,16 +169,16 @@ export default function HomePage() {
 
           if (data.content) {
             messages.push({ role: 'assistant', content: data.content });
+            const cleanAi = data.content
+              .replace(/<section_update>[\s\S]*?<\/section_update>/g, '')
+              .trim();
+            if (cleanAi) addTranscript('ai', cleanAi);
             const updates = parseSectionUpdates(data.content);
             updates.forEach((u) =>
               addSection(u.section, { title: u.title, content: u.content })
             );
             setMicState('AI_SPEAKING');
-            const utterance = new SpeechSynthesisUtterance(
-              data.content
-                .replace(/<section_update>[\s\S]*?<\/section_update>/g, '')
-                .trim()
-            );
+            const utterance = new SpeechSynthesisUtterance(cleanAi);
             utterance.onend = () => setMicState('LISTENING');
             window.speechSynthesis.speak(utterance);
           }
@@ -203,7 +212,7 @@ export default function HomePage() {
       recognition.start();
       conversationRef.current = { _recognition: recognition };
     },
-    [addSection, setMicState, setMicError]
+    [addSection, addTranscript, setMicState, setMicError]
   );
 
   // ── Start session ─────────────────────────────────────────────────────────
@@ -245,6 +254,13 @@ export default function HomePage() {
         agentKey: selectedAgent,
         systemPrompt: prompt,
         onMessage: (msg) => {
+          // Strip <section_update> blocks before adding to transcript
+          const cleanText = msg.message
+            .replace(/<section_update>[\s\S]*?<\/section_update>/g, '')
+            .trim();
+          if (cleanText) {
+            addTranscript(msg.source === 'ai' ? 'ai' : 'user', cleanText);
+          }
           if (msg.source === 'ai') {
             const updates = parseSectionUpdates(msg.message);
             updates.forEach((u) =>
@@ -295,6 +311,7 @@ export default function HomePage() {
     stopLevelMonitor,
     startLevelMonitor,
     addSection,
+    addTranscript,
     useBrowserFallback,
   ]);
 
@@ -336,12 +353,14 @@ export default function HomePage() {
         <div className="relative min-w-0 flex-1">
           <HeroPanel
             agentName={agentDisplayName}
+            agentAvatar={AGENT_AVATARS[selectedAgent] ?? '/images/hero-figure.png'}
             appState={state}
             micState={micState}
             micError={micError}
             audioLevel={audioLevel}
             audioEnabled={audioEnabled}
             onStartSession={handleStartSession}
+            onNewSession={handleNewSession}
             onToggleAudio={toggleAudio}
           />
           <AvatarCanvas />
@@ -359,6 +378,7 @@ export default function HomePage() {
           {state === 'active' && (
             <LiveDocument
               sections={sections}
+              transcript={transcript}
               elapsedSeconds={elapsedSeconds}
               onPause={handleEndSession}
               onEnd={handleEndSession}

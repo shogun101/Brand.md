@@ -2,28 +2,26 @@
 import { useState } from 'react';
 import AgentCard from './AgentCard';
 import ModuleItem from './ModuleItem';
+import { useSessionStore } from '@/lib/session-store';
 
 const AGENTS = [
   {
     id: 'strategist',
     name: 'STRATEGIST',
     role: 'Big Picture',
-    image: '/images/agent-card-bg.png',
-    overlay: '/images/hero-overlay.png',
+    image: '/images/hero-figure.png',
   },
   {
     id: 'creative',
-    name: 'Creative',
+    name: 'CREATIVE',
     role: 'Visual Style',
-    image: '/images/agent-card-bg.png',
-    overlay: null,
+    image: '/images/hero-creative.png',
   },
   {
     id: 'guide',
-    name: 'Guide',
+    name: 'GUIDE',
     role: 'Growth',
-    image: '/images/hero-figure.png',
-    overlay: null,
+    image: '/images/hero-guide.png',
   },
 ];
 
@@ -41,13 +39,13 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ onStartSession, onAgentChange, onModulesChange }: SidebarProps) {
-  const [selectedAgent, setSelectedAgent] = useState('strategist');
+  const { selectedAgent, setAgent } = useSessionStore();
   const [modules, setModules] = useState<Map<string, boolean>>(
     () => new Map(DEFAULT_MODULES.map((m) => [m.id, m.defaultChecked]))
   );
 
   const handleAgentSelect = (id: string) => {
-    setSelectedAgent(id);
+    setAgent(id);
     onAgentChange?.(id);
   };
 
@@ -109,7 +107,6 @@ export default function Sidebar({ onStartSession, onAgentChange, onModulesChange
                 name={agent.name}
                 role={agent.role}
                 image={agent.image}
-                overlay={agent.overlay}
                 selected={selectedAgent === agent.id}
                 onClick={() => handleAgentSelect(agent.id)}
               />

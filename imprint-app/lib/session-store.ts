@@ -8,6 +8,13 @@ interface SectionData {
   content: string;
 }
 
+export interface TranscriptEntry {
+  id: string;
+  role: 'user' | 'ai';
+  text: string;
+  ts: number;
+}
+
 interface SessionStore {
   state: AppState;
   setState: (s: AppState) => void;
@@ -30,6 +37,9 @@ interface SessionStore {
   sections: Record<string, SectionData>;
   addSection: (slug: string, data: SectionData) => void;
   updateSection: (slug: string, content: string) => void;
+
+  transcript: TranscriptEntry[];
+  addTranscript: (role: 'user' | 'ai', text: string) => void;
 
   audioEnabled: boolean;
   toggleAudio: () => void;
@@ -77,6 +87,15 @@ export const useSessionStore = create<SessionStore>((set) => ({
       },
     })),
 
+  transcript: [],
+  addTranscript: (role, text) =>
+    set((s) => ({
+      transcript: [
+        ...s.transcript,
+        { id: crypto.randomUUID(), role, text, ts: Date.now() },
+      ],
+    })),
+
   audioEnabled: true,
   toggleAudio: () => set((s) => ({ audioEnabled: !s.audioEnabled })),
 
@@ -94,6 +113,7 @@ export const useSessionStore = create<SessionStore>((set) => ({
       micError: null,
       elapsedSeconds: 0,
       sections: {},
+      transcript: [],
       audioLevel: 0,
     }),
 }));

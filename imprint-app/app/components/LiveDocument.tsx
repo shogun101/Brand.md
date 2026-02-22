@@ -1,5 +1,7 @@
 'use client';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Pause, StopCircle } from 'lucide-react';
+import type { TranscriptEntry } from '@/lib/session-store';
 
 interface SectionData {
   title: string;
@@ -8,6 +10,7 @@ interface SectionData {
 
 interface LiveDocumentProps {
   sections: Record<string, SectionData>;
+  transcript: TranscriptEntry[];
   elapsedSeconds: number;
   onPause?: () => void;
   onEnd?: () => void;
@@ -21,18 +24,12 @@ function TypedText({ text }: { text: string }) {
 
   useEffect(() => {
     if (text === prevRef.current) return;
-    const newText = text;
-    prevRef.current = newText;
+    prevRef.current = text;
     setDone(false);
-
     let i = displayed.length;
     const interval = setInterval(() => {
-      if (i >= newText.length) {
-        setDone(true);
-        clearInterval(interval);
-        return;
-      }
-      setDisplayed(newText.slice(0, i + 1));
+      if (i >= text.length) { setDone(true); clearInterval(interval); return; }
+      setDisplayed(text.slice(0, i + 1));
       i++;
     }, 18);
     return () => clearInterval(interval);
@@ -42,39 +39,49 @@ function TypedText({ text }: { text: string }) {
   return (
     <span>
       {displayed}
-      {!done && (
-        <span className="animate-blink ml-[1px] text-brand-accent">|</span>
-      )}
+      {!done && <span className="animate-blink ml-[1px] text-brand-accent">|</span>}
     </span>
   );
 }
 
-function SkeletonSection() {
+function ListeningPulse() {
   return (
-    <div className="mb-6">
-      <div className="mb-2 h-5 w-1/3 rounded animate-shimmer" />
-      <div className="space-y-2">
-        <div className="h-3.5 w-[70%] rounded animate-shimmer" />
-        <div className="h-3.5 w-full rounded animate-shimmer" />
-        <div className="h-3.5 w-[55%] rounded animate-shimmer" />
+    <div className="flex flex-col items-center justify-center h-full gap-4 text-center py-24">
+      <div className="flex gap-[5px] items-center">
+        {[0, 1, 2].map((i) => (
+          <div
+            key={i}
+            className="size-2 rounded-full bg-neutral-600 animate-dot-pulse"
+            style={{ animationDelay: `${i * 0.2}s` }}
+          />
+        ))}
       </div>
+      <p className="font-inter text-[13px] text-neutral-500">
+        Listening — content will appear as the session progresses
+      </p>
     </div>
   );
 }
 
 export default function LiveDocument({
   sections,
+  transcript,
   elapsedSeconds,
   onPause,
   onEnd,
-  expectedSections = [],
 }: LiveDocumentProps) {
+  const bottomRef = useRef<HTMLDivElement>(null);
   const mm = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
   const ss = String(elapsedSeconds % 60).padStart(2, '0');
 
   const sectionEntries = Object.entries(sections);
-  const capturedCount = sectionEntries.length;
-  const pendingCount = Math.max(0, expectedSections.length - capturedCount);
+  const hasSections = sectionEntries.length > 0;
+  const hasTranscript = transcript.length > 0;
+
+  // Auto-scroll to bottom when transcript grows
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [transcript.length]);
 
   return (
     <div className="flex h-full flex-col bg-brand-surface">
@@ -92,16 +99,18 @@ export default function LiveDocument({
           {onPause && (
             <button
               onClick={onPause}
-              className="flex h-[33.5px] w-[72px] items-center justify-center rounded-[20px] border border-[#3f3f3f] font-inter text-[13.3px] text-neutral-50 transition-opacity hover:opacity-70"
+              className="flex h-8 items-center gap-1.5 justify-center rounded-full border border-[#3f3f3f] px-3 font-inter text-[12px] text-neutral-300 transition-opacity hover:opacity-70"
             >
+              <Pause size={11} />
               Pause
             </button>
           )}
           {onEnd && (
             <button
               onClick={onEnd}
-              className="flex h-[33.5px] items-center justify-center rounded-[20px] border border-[#3f3f3f] px-4 font-inter text-[13.3px] text-neutral-200 transition-opacity hover:opacity-70"
+              className="flex h-8 items-center gap-1.5 justify-center rounded-full bg-neutral-50 px-3 font-inter text-[12px] text-black shadow-[0px_2px_4px_0px_rgba(0,0,0,0.2)] transition-opacity hover:opacity-90"
             >
+              <StopCircle size={11} />
               End
             </button>
           )}
@@ -110,24 +119,63 @@ export default function LiveDocument({
 
       {/* Content */}
       <div className="custom-scrollbar flex-1 overflow-y-auto px-12 py-8 space-y-8">
-        {sectionEntries.map(([slug, data]) => (
-          <div key={slug} className="flex gap-3">
-            <div className="w-[2px] shrink-0 rounded-full bg-brand-accent" />
-            <div className="flex-1">
-              <h3 className="font-awesome-serif text-[20px] leading-[24px] text-neutral-50 mb-2">
-                {data.title}
-              </h3>
-              <p className="font-inter text-[15.2px] leading-[24.32px] text-neutral-200">
-                <TypedText text={data.content} />
-              </p>
-            </div>
-          </div>
-        ))}
 
-        {/* Skeletons for pending sections */}
-        {Array.from({ length: pendingCount }).map((_, i) => (
-          <SkeletonSection key={`skeleton-${i}`} />
-        ))}
+        {/* Captured sections — appear as the AI structures them */}
+        {hasSections && (
+          <div className="space-y-8">
+            {sectionEntries.map(([slug, data]) => (
+              <div key={slug} className="flex gap-3">
+                <div className="w-[2px] shrink-0 rounded-full bg-brand-accent" />
+                <div className="flex-1">
+                  <h3 className="font-awesome-serif text-[18px] leading-[22px] text-neutral-50 mb-2">
+                    {data.title}
+                  </h3>
+                  <p className="font-inter text-[14px] leading-[22px] text-neutral-200">
+                    <TypedText text={data.content} />
+                  </p>
+                </div>
+              </div>
+            ))}
+            {/* Divider between sections and transcript */}
+            {hasTranscript && (
+              <div className="border-t border-neutral-800 pt-6">
+                <p className="font-inter text-[11px] uppercase tracking-[0.56px] text-neutral-500 mb-4">
+                  Conversation
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Live transcript */}
+        {hasTranscript ? (
+          <div className="space-y-3">
+            {transcript.map((entry) => (
+              <div
+                key={entry.id}
+                className={`flex gap-3 ${entry.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                {entry.role === 'ai' && (
+                  <div className="size-6 shrink-0 rounded-full bg-neutral-700 flex items-center justify-center mt-0.5">
+                    <div className="size-2 rounded-full bg-brand-accent" />
+                  </div>
+                )}
+                <div
+                  className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${
+                    entry.role === 'ai'
+                      ? 'bg-neutral-800 text-neutral-100'
+                      : 'bg-neutral-700 text-neutral-50'
+                  }`}
+                >
+                  <p className="font-inter text-[13.5px] leading-[20px]">{entry.text}</p>
+                </div>
+              </div>
+            ))}
+            <div ref={bottomRef} />
+          </div>
+        ) : (
+          !hasSections && <ListeningPulse />
+        )}
       </div>
     </div>
   );

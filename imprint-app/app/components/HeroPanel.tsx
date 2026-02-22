@@ -7,26 +7,29 @@ type AppState = 'idle' | 'active' | 'complete';
 
 interface HeroPanelProps {
   agentName?: string;
+  agentAvatar?: string;
   appState: AppState;
   micState: MicState;
   micError?: string | null;
   audioLevel?: number;
   audioEnabled: boolean;
   onStartSession?: () => void;
+  onNewSession?: () => void;
   onToggleAudio?: () => void;
 }
 
 export default function HeroPanel({
   agentName = 'STRATEGIST',
+  agentAvatar = '/images/hero-figure.png',
   appState,
   micState,
   micError,
   audioLevel = 0,
   audioEnabled,
   onStartSession,
+  onNewSession,
   onToggleAudio,
 }: HeroPanelProps) {
-  // Radial halo color by state
   const haloColor =
     micState === 'LISTENING'
       ? 'rgba(70,167,88,0.08)'
@@ -38,7 +41,7 @@ export default function HeroPanel({
 
   return (
     <div className="relative h-full overflow-hidden border-r border-neutral-800 bg-brand-panel">
-      {/* 1. Radial halo — z-1, behind the figure */}
+      {/* 1. Radial halo — z-1 */}
       <div
         className="pointer-events-none absolute inset-0 z-[1] transition-all duration-1000"
         style={{
@@ -46,11 +49,12 @@ export default function HeroPanel({
         }}
       />
 
-      {/* 2. Figure image — z-2, above halo */}
+      {/* 2. Agent avatar — z-2, swaps on agent selection */}
       <div className="absolute inset-0 z-[2]">
         <img
-          src="/images/hero-figure.png"
-          alt="AI Strategist figure"
+          key={agentAvatar}
+          src={agentAvatar}
+          alt="Agent avatar"
           className="absolute inset-0 h-full w-[103.7%] max-w-none object-cover animate-avatar-breathe"
           style={{ left: '-1.88%', top: '-0.05%' }}
         />
@@ -85,7 +89,7 @@ export default function HeroPanel({
         <MicIndicator micState={micState} micError={micError} audioLevel={audioLevel} />
       )}
       {showComplete && (
-        <FloatingBar label="Session Complete ✓" />
+        <FloatingBar isComplete onNewSession={onNewSession} />
       )}
     </div>
   );

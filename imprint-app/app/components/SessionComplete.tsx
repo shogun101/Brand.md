@@ -1,4 +1,5 @@
 'use client';
+import { Download, RotateCcw } from 'lucide-react';
 import { generateExportZip, downloadZip } from '@/lib/export';
 import { useSessionStore } from '@/lib/session-store';
 
@@ -16,6 +17,8 @@ export default function SessionComplete({ sections, onNewSession }: SessionCompl
   const { selectedAgent, selectedModules, brandName, elapsedSeconds, sessionId } =
     useSessionStore();
 
+  const hasSections = Object.keys(sections).length > 0;
+
   const handleDownload = async () => {
     const session = {
       id: sessionId || crypto.randomUUID(),
@@ -26,7 +29,6 @@ export default function SessionComplete({ sections, onNewSession }: SessionCompl
       document: sections,
       created_at: new Date().toISOString(),
     };
-
     const blob = await generateExportZip(session);
     const slug = (session.brand_name || 'brand')
       .toLowerCase()
@@ -37,47 +39,74 @@ export default function SessionComplete({ sections, onNewSession }: SessionCompl
   return (
     <div className="flex h-full flex-col bg-brand-surface">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-neutral-800 px-12 pt-12 pb-4">
+      <div className="flex items-start justify-between border-b border-neutral-800 px-12 pt-12 pb-4">
         <div>
           <h2 className="font-awesome-serif text-[24px] tracking-[-0.48px] text-neutral-50">
             Session Complete
           </h2>
-          <p className="mt-1 font-inter text-[13px] text-neutral-200">
-            Your brand files are ready to download.
+          <p className="mt-1 font-inter text-[13px] text-neutral-400">
+            {hasSections
+              ? `${Object.keys(sections).length} section${Object.keys(sections).length > 1 ? 's' : ''} captured — review and download`
+              : 'Your session has ended'}
           </p>
         </div>
-        <button
-          onClick={handleDownload}
-          className="flex h-[40px] items-center justify-center rounded-[20px] bg-brand-accent px-5 font-inter text-[13.3px] font-medium text-black transition-opacity hover:opacity-90 whitespace-nowrap"
-        >
-          Download brand.md
-        </button>
+        {hasSections && (
+          <button
+            onClick={handleDownload}
+            className="flex h-8 items-center gap-1.5 justify-center rounded-full bg-neutral-50 px-3 font-inter text-[12px] font-medium text-black shadow-[0px_2px_4px_0px_rgba(0,0,0,0.2)] transition-opacity hover:opacity-90 whitespace-nowrap"
+          >
+            <Download size={11} />
+            Download
+          </button>
+        )}
       </div>
 
-      {/* Static doc */}
-      <div className="custom-scrollbar flex-1 overflow-y-auto px-12 py-8 space-y-8">
-        {Object.entries(sections).map(([slug, data]) => (
-          <div key={slug} className="flex gap-3">
-            <div className="w-[2px] shrink-0 rounded-full bg-brand-accent" />
-            <div className="flex-1">
-              <h3 className="font-awesome-serif text-[20px] leading-[24px] text-neutral-50 mb-2">
-                {data.title}
-              </h3>
-              <p className="font-inter text-[15.2px] leading-[24.32px] text-neutral-200">
-                {data.content}
-              </p>
-            </div>
+      {/* Markdown preview — Notion/Granola style */}
+      <div className="custom-scrollbar flex-1 overflow-y-auto px-12 py-8">
+        {hasSections ? (
+          <div className="space-y-10">
+            {Object.entries(sections).map(([slug, data]) => (
+              <div key={slug} className="group">
+                {/* Section heading */}
+                <h3 className="font-awesome-serif text-[20px] leading-[26px] text-neutral-50 mb-3">
+                  {data.title}
+                </h3>
+                {/* Editable content — contentEditable for light tweaks */}
+                <p
+                  contentEditable
+                  suppressContentEditableWarning
+                  className="font-inter text-[14.5px] leading-[24px] text-neutral-300 outline-none rounded-lg px-3 py-2 -mx-3 transition-colors cursor-text hover:bg-neutral-800/50 focus:bg-neutral-800 focus:text-neutral-50 whitespace-pre-wrap"
+                >
+                  {data.content}
+                </p>
+                {/* Subtle divider */}
+                <div className="mt-8 border-t border-neutral-800/60" />
+              </div>
+            ))}
           </div>
-        ))}
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full gap-3 text-center py-24">
+            <p className="font-inter text-[14px] text-neutral-500">
+              No sections were captured in this session.
+            </p>
+            <p className="font-inter text-[12px] text-neutral-600">
+              Try speaking longer — the agent structures content as you go.
+            </p>
+          </div>
+        )}
       </div>
 
-      {/* Footer */}
-      <div className="border-t border-neutral-800 px-12 py-4">
+      {/* Footer CTA */}
+      <div className="border-t border-neutral-800 px-12 py-5 flex items-center justify-between">
+        <p className="font-inter text-[12px] text-neutral-600">
+          {hasSections ? 'Click any section to edit before downloading' : ''}
+        </p>
         <button
           onClick={onNewSession}
-          className="font-inter text-[13.3px] text-neutral-200 transition-colors hover:text-neutral-50"
+          className="flex items-center gap-2 rounded-full border border-neutral-600 bg-[rgba(37,37,37,0.67)] px-4 py-2 font-inter text-[13px] font-medium text-neutral-200 transition-opacity hover:opacity-80 whitespace-nowrap"
         >
-          Start New Session →
+          <RotateCcw size={12} />
+          Start Another Session
         </button>
       </div>
     </div>

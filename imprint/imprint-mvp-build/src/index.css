@@ -1,0 +1,149 @@
+@import "tailwindcss";
+
+/* ============================================================
+   FONT DECLARATIONS — Awesome Serif (OTF)
+   Upright (normal) + Italic variants
+   Weights: Light 300 / Regular 400 / Medium 500 / SemiBold 600
+   ============================================================ */
+
+/* ── Upright variants ── */
+@font-face {
+  font-family: "Awesome Serif";
+  src: url("./assets/fonts/AwesomeSerif-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Awesome Serif";
+  src: url("./assets/fonts/AwesomeSerif-LightRegular.otf") format("opentype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Awesome Serif";
+  src: url("./assets/fonts/AwesomeSerif-MediumRegular.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Awesome Serif";
+  src: url("./assets/fonts/AwesomeSerif-SemiBoldRegular.otf") format("opentype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── Italic variants ── */
+@font-face {
+  font-family: "Awesome Serif";
+  src: url("./assets/fonts/AwesomeSerifItalic-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Awesome Serif";
+  src: url("./assets/fonts/AwesomeSerifItalic-LightReg.otf") format("opentype");
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Awesome Serif";
+  src: url("./assets/fonts/AwesomeSerifItalic-MedRegular.otf") format("opentype");
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Awesome Serif";
+  src: url("./assets/fonts/AwesomeSerifItalic-SmRegular.otf") format("opentype");
+  font-weight: 600;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ============================================================
+   TAILWIND THEME EXTENSION
+   ============================================================ */
+
+@theme {
+  /* Fonts */
+  --font-awesome-serif: "Awesome Serif", Georgia, "Times New Roman", serif;
+  --font-inter: "Inter", system-ui, -apple-system, sans-serif;
+
+  /* Brand Colors */
+  --color-brand-dark: #010506;
+  --color-brand-surface: #020607;
+  --color-brand-panel: #0f0f0f;
+  --color-brand-sidebar: #1c1c1c;
+  --color-brand-accent: #d97706;
+  --color-brand-success: #46a758;
+
+  /* Neutral Palette */
+  --color-neutral-50: #ededed;
+  --color-neutral-100: #d4d4d4;
+  --color-neutral-200: #8e8e93;
+  --color-neutral-300: #525252;
+  --color-neutral-400: #444444;
+  --color-neutral-500: #3f3f3f;
+  --color-neutral-600: #333333;
+  --color-neutral-700: #2f2f2f;
+  --color-neutral-800: #2a2a2a;
+  --color-neutral-900: #131313;
+}
+
+/* ============================================================
+   GLOBAL RESETS
+   ============================================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background-color: var(--color-brand-dark);
+  color: var(--color-neutral-50);
+  font-family: var(--font-inter);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================================
+   CUSTOM SCROLLBAR (sidebar)
+   ============================================================ */
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-neutral-800);
+  border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--color-neutral-600);
+}
