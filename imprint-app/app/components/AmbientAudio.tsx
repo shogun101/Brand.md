@@ -3,13 +3,13 @@ import { useEffect, useRef } from 'react';
 import { useSessionStore } from '@/lib/session-store';
 
 // Volume targets per state
-const VOL_IDLE    = 0.18;  // audible ambient on home screen
-const VOL_ACTIVE  = 0.06;  // barely there during session
-const VOL_SPEAKING = 0.02; // near-silent when agent is talking
-const VOL_OFF     = 0;
+const VOL_IDLE     = 0.35;  // audible ambient on home screen
+const VOL_ACTIVE   = 0.10;  // subtle during session
+const VOL_SPEAKING = 0.03;  // near-silent when agent is talking
+const VOL_OFF      = 0;
 
 function fadeTo(audio: HTMLAudioElement, target: number, stepMs = 60): () => void {
-  const step = target > audio.volume ? 0.01 : -0.015;
+  const step = target > audio.volume ? 0.012 : -0.015;
   const id = setInterval(() => {
     const next = audio.volume + step;
     if ((step > 0 && next >= target) || (step < 0 && next <= target)) {
@@ -24,7 +24,27 @@ function fadeTo(audio: HTMLAudioElement, target: number, stepMs = 60): () => voi
 
 export function AmbientAudio() {
   const audioRef = useRef<HTMLAudioElement>(null);
+  const unlockedRef = useRef(false);
   const { state, audioEnabled, micState } = useSessionStore();
+
+  // Unlock audio on first user interaction (browser autoplay policy)
+  useEffect(() => {
+    const unlock = () => {
+      if (unlockedRef.current) return;
+      const audio = audioRef.current;
+      if (!audio) return;
+      audio.play().then(() => {
+        unlockedRef.current = true;
+        if (!audioEnabled) audio.pause();
+      }).catch(() => {});
+    };
+    window.addEventListener('click', unlock, { once: true });
+    window.addEventListener('touchstart', unlock, { once: true });
+    return () => {
+      window.removeEventListener('click', unlock);
+      window.removeEventListener('touchstart', unlock);
+    };
+  }, [audioEnabled]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -35,17 +55,17 @@ export function AmbientAudio() {
     }
 
     if (state === 'idle') {
-      audio.play().catch(() => {});
+      if (unlockedRef.current) audio.play().catch(() => {});
       return fadeTo(audio, VOL_IDLE);
     }
 
     if (state === 'active') {
-      audio.play().catch(() => {});
+      if (unlockedRef.current) audio.play().catch(() => {});
       const target = micState === 'AI_SPEAKING' ? VOL_SPEAKING : VOL_ACTIVE;
       return fadeTo(audio, target);
     }
 
-    // complete or other — fade out
+    // complete — fade out
     return fadeTo(audio, VOL_OFF);
   }, [state, audioEnabled, micState]);
 
