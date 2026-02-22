@@ -91,9 +91,12 @@ export default function LiveDocument({
           <h2 className="font-awesome-serif text-[24px] tracking-[-0.48px] text-neutral-50">
             Brand Session
           </h2>
-          <p className="mt-1 font-inter text-[13px] text-brand-accent">
-            Live Capturing • {mm}:{ss}
-          </p>
+          <div className="mt-1 flex items-center gap-2">
+            <div className="size-[7px] rounded-full bg-[#FF3B30] animate-pulse" />
+            <p className="font-inter text-[13px] text-[#8E8E93]">
+              Live Capturing • {mm}:{ss}
+            </p>
+          </div>
         </div>
         <div className="flex gap-2">
           {onPause && (
@@ -101,7 +104,7 @@ export default function LiveDocument({
               onClick={onPause}
               className="flex h-8 items-center gap-1.5 justify-center rounded-full border border-[#3f3f3f] px-3 font-inter text-[12px] text-neutral-300 transition-opacity hover:opacity-70"
             >
-              <Pause size={11} />
+              <Pause size={11} fill="currentColor" />
               Pause
             </button>
           )}
@@ -110,7 +113,7 @@ export default function LiveDocument({
               onClick={onEnd}
               className="flex h-8 items-center gap-1.5 justify-center rounded-full bg-neutral-50 px-3 font-inter text-[12px] text-black shadow-[0px_2px_4px_0px_rgba(0,0,0,0.2)] transition-opacity hover:opacity-90"
             >
-              <StopCircle size={11} />
+              <StopCircle size={11} fill="currentColor" />
               End
             </button>
           )}

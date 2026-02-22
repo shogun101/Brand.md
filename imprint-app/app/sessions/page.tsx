@@ -1,5 +1,6 @@
 'use client';
 import { useRouter } from 'next/navigation';
+import { FileText } from 'lucide-react';
 import Navbar from '../components/Navbar';
 
 interface MockSession {
@@ -56,15 +57,9 @@ function SessionCard({ session, onClick }: { session: MockSession; onClick: () =
       className="cursor-pointer bg-brand-sidebar transition-colors hover:bg-[#222] p-5"
     >
       <div className="flex gap-5">
-        {/* Icon badge */}
-        <div
-          className="flex size-10 shrink-0 items-center justify-center rounded-[8px] border text-[17.6px] text-brand-accent"
-          style={{
-            background: 'rgba(217,119,6,0.1)',
-            borderColor: 'rgba(217,119,6,0.2)',
-          }}
-        >
-          {session.icon}
+        {/* Icon badge — circular, white opacity */}
+        <div className="flex size-11 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5">
+          <FileText size={20} className="text-white/60" fill="currentColor" />
         </div>
 
         {/* Content */}
@@ -84,7 +79,7 @@ function SessionCard({ session, onClick }: { session: MockSession; onClick: () =
               e.stopPropagation();
               onClick();
             }}
-            className="self-start font-inter text-[12.8px] text-brand-accent transition-opacity hover:opacity-70"
+            className="self-start font-inter text-[12.8px] text-white/40 transition-opacity hover:text-white/70"
           >
             Open Document →
           </button>
@@ -113,8 +108,7 @@ export default function SessionsPage() {
           {/* Header */}
           <div className="mb-10">
             <h1 className="font-awesome-serif text-[27.1px] text-neutral-50">
-              Past{' '}
-              <span className="italic text-brand-accent">Sessions</span>
+              Past Sessions
             </h1>
             <p className="mt-2 font-inter text-[14.4px] leading-[21.6px] text-neutral-200">
               Review your brand architecture documents and transcripts.
