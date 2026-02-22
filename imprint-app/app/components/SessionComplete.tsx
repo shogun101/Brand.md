@@ -79,7 +79,7 @@ export default function SessionComplete({ sections, onNewSession }: SessionCompl
     <div className="flex h-full flex-col bg-brand-surface">
 
       {/* ── Header ── px-8 pt-8 pb-4 */}
-      <div className="flex items-start justify-between border-b border-neutral-800 px-8 pt-8 pb-4">
+      <div className="flex items-center justify-between border-b border-neutral-800 px-8 py-6">
         <div>
           <h2 className="font-awesome-serif text-[24px] tracking-[-0.48px] text-neutral-50">
             Session Complete
@@ -96,7 +96,7 @@ export default function SessionComplete({ sections, onNewSession }: SessionCompl
           onClick={handleDownload}
           className="flex h-8 items-center gap-1.5 justify-center rounded-full bg-neutral-50 px-3 font-inter text-[12px] font-medium text-black shadow-[0px_2px_4px_0px_rgba(0,0,0,0.2)] transition-opacity hover:opacity-90 whitespace-nowrap shrink-0"
         >
-          <ArrowDownTrayIcon className="size-[11px] stroke-[2.5]" />
+          <ArrowDownTrayIcon className="w-3 h-3 stroke-[2.5]" />
           Download
         </button>
       </div>
@@ -192,9 +192,6 @@ export default function SessionComplete({ sections, onNewSession }: SessionCompl
                 Not enough was captured to build a document. Try a longer session next time.
               </p>
             </div>
-            <p className="font-inter text-[11.5px] text-neutral-600 max-w-[220px] leading-[17px]">
-              The download still includes your session metadata and timestamp.
-            </p>
           </div>
         )}
       </div>
@@ -205,7 +202,7 @@ export default function SessionComplete({ sections, onNewSession }: SessionCompl
           onClick={onNewSession}
           className="flex h-12 w-full items-center justify-center gap-2 rounded-full border border-neutral-600 bg-[rgba(37,37,37,0.8)] font-inter text-[14px] font-medium text-neutral-200 transition-opacity hover:opacity-80"
         >
-          <ArrowPathIcon className="size-[13px] stroke-[2]" />
+          <ArrowPathIcon className="w-3.5 h-3.5 stroke-[2]" />
           Start Another Session
         </button>
       </div>

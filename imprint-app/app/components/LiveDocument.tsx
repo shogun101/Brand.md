@@ -2,7 +2,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { PauseIcon, StopCircleIcon } from '@heroicons/react/24/solid';
 import { Message } from './ui/message';
+import { useSessionStore } from '@/lib/session-store';
 import type { TranscriptEntry } from '@/lib/session-store';
+
+const AGENT_AVATARS: Record<string, string> = {
+  strategist: '/images/hero-figure.png',
+  creative: '/images/hero-creative.png',
+  guide: '/images/hero-guide.png',
+};
 
 interface SectionData {
   title: string;
@@ -72,8 +79,11 @@ export default function LiveDocument({
   onEnd,
 }: LiveDocumentProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
+  const { selectedAgent } = useSessionStore();
   const mm = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
   const ss = String(elapsedSeconds % 60).padStart(2, '0');
+
+  const agentAvatar = AGENT_AVATARS[selectedAgent] ?? '/images/hero-figure.png';
 
   const sectionEntries = Object.entries(sections);
   const hasSections = sectionEntries.length > 0;
@@ -86,8 +96,8 @@ export default function LiveDocument({
 
   return (
     <div className="flex h-full flex-col bg-brand-surface">
-      {/* ── Header ── px-8 pt-8 pb-4 matches SessionComplete exactly */}
-      <div className="flex items-start justify-between border-b border-neutral-800 px-8 pt-8 pb-4">
+      {/* ── Header ── equal top/bottom padding, items-center */}
+      <div className="flex items-center justify-between border-b border-neutral-800 px-8 py-6">
         <div>
           <h2 className="font-awesome-serif text-[24px] tracking-[-0.48px] text-neutral-50">
             Brand Session
@@ -100,13 +110,14 @@ export default function LiveDocument({
           </div>
         </div>
 
+        {/* Fix 5 + 7: vertically centered buttons, icons match text size */}
         <div className="flex items-center gap-2">
           {onPause && (
             <button
               onClick={onPause}
               className="flex h-8 items-center gap-1.5 justify-center rounded-full border border-[#3f3f3f] px-3 font-inter text-[12px] text-neutral-300 transition-opacity hover:opacity-70"
             >
-              <PauseIcon className="size-[11px]" />
+              <PauseIcon className="w-3 h-3" />
               Pause
             </button>
           )}
@@ -115,14 +126,14 @@ export default function LiveDocument({
               onClick={onEnd}
               className="flex h-8 items-center gap-1.5 justify-center rounded-full bg-neutral-50 px-3 font-inter text-[12px] text-black shadow-[0px_2px_4px_0px_rgba(0,0,0,0.2)] transition-opacity hover:opacity-90"
             >
-              <StopCircleIcon className="size-[11px]" />
+              <StopCircleIcon className="w-3 h-3" />
               End
             </button>
           )}
         </div>
       </div>
 
-      {/* ── Scrollable content ── px-8 py-8 matches SessionComplete exactly */}
+      {/* ── Scrollable content ── px-8 py-8 */}
       <div className="custom-scrollbar flex-1 overflow-y-auto px-8 py-8 space-y-8">
 
         {/* Captured sections — appear as the AI structures them */}
@@ -153,7 +164,7 @@ export default function LiveDocument({
           </div>
         )}
 
-        {/* Live transcript — using prompt-kit-style Message component */}
+        {/* Live transcript — using Message component with agent avatar */}
         {hasTranscript ? (
           <div className="space-y-3">
             {transcript.map((entry) => (
@@ -161,6 +172,7 @@ export default function LiveDocument({
                 key={entry.id}
                 role={entry.role === 'user' ? 'user' : 'assistant'}
                 content={entry.text}
+                avatar={entry.role !== 'user' ? agentAvatar : undefined}
               />
             ))}
             <div ref={bottomRef} />

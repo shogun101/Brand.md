@@ -129,7 +129,7 @@ export default function MicIndicator({
         {micState !== 'ERROR' && (onPause || onEnd) && (
           <>
             {/* Thin vertical separator */}
-            <div className="self-stretch w-px bg-neutral-700 my-1.5" />
+            <div className="w-px h-5 bg-neutral-500 self-center" />
 
             {/* Action buttons */}
             <div className="flex items-center gap-1 py-1.5 pl-2 pr-2">
@@ -137,18 +137,18 @@ export default function MicIndicator({
                 <button
                   onClick={onPause}
                   title="Pause session"
-                  className="flex size-7 items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-neutral-700 hover:text-neutral-200"
+                  className="flex size-8 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10"
                 >
-                  <PauseIcon className="size-3.5" />
+                  <PauseIcon className="w-5 h-5" />
                 </button>
               )}
               {onEnd && (
                 <button
                   onClick={onEnd}
                   title="End session"
-                  className="flex size-7 items-center justify-center rounded-full text-neutral-400 transition-colors hover:bg-neutral-700 hover:text-red-400"
+                  className="flex size-8 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10"
                 >
-                  <XMarkIcon className="size-3.5" />
+                  <XMarkIcon className="w-5 h-5" />
                 </button>
               )}
             </div>
