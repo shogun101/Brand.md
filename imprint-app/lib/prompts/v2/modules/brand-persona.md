@@ -1,130 +1,64 @@
 # Module: Brand Persona
 
-> Append this after `system-base.md` + agent persona. This defines the question flow for this session.
-> **Target time: 5-7 minutes. Max 5 questions. 5 sections to capture.**
+> **The Open Question:** "Describe your ideal customer's life."
+> **Target: 5-7 min. Sections: 5. Max follow-ups: 2-3.**
 
 ---
 
-## Sections to Capture
+## The Open Question
 
-| Section Slug | Title | What You Need |
-|-------------|-------|---------------|
-| `persona-profile` | Persona Profile | Name, role, age range, quick sketch of their life |
-| `pain-points` | Pain Points | 2-3 specific frustrations with details |
-| `language-patterns` | Language Patterns | Exact phrases they use, what they Google |
-| `current-alternatives` | Current Alternatives | What they use now and why it falls short |
-| `motivation-triggers` | Motivation Triggers | What makes them finally switch/buy |
+> "Hey — we're doing Brand Persona. About 5 minutes. Describe your ideal customer to me — who are they, what's their day like, what's frustrating them, and what are they doing about it right now?"
+
+This single question invites profile, pain points, current alternatives, and sometimes even triggers — all at once.
 
 ---
 
-## Question Flow
+## Sections to Listen For
 
-### Q1 → Captures: `persona-profile` (75 sec)
-
-**Ask:**
-> "Let's build your ideal customer. Give me a first name — real or made up. What do they do for work? Walk me through their morning."
-
-**If vague** ("Business owners"):
-> "Let's make them real. Is this person more like a 28-year-old startup founder drinking cold brew at a co-working space, or a 45-year-old ops manager in a mid-size company checking Slack before their kids wake up? Pick one — or tell me who they actually are."
-
-**If stuck**, offer a starter:
-> "Try this: 'My ideal customer is a [role] at a [type of company], probably in their [age range], and their biggest headache is [thing].' Fill in the blanks however feels right."
-
-**Skip rule:** Need at least a role and situation. Can skip the narrative morning walkthrough.
-
-**Emit `persona-profile`. Transition:**
-> "Okay, I can see [name]. Now — what's making their life hard?"
+| Section | Slug | What to Listen For |
+|---------|------|--------------------|
+| Persona Profile | `persona-profile` | Role, age range, what their life looks like |
+| Pain Points | `pain-points` | Specific frustrations, "there has to be a better way" moments |
+| Language Patterns | `language-patterns` | How they describe the problem, what they'd Google |
+| Current Alternatives | `current-alternatives` | What they use now — the janky workaround, the bad tool, doing nothing |
+| Motivation Triggers | `motivation-triggers` | What makes them finally act — the breaking point |
 
 ---
 
-### Q2 → Captures: `pain-points` (75 sec)
+## After They Finish Talking
 
-**Ask:**
-> "What makes [persona name] say 'there HAS to be a better way'? What's the moment of frustration?"
+**If they painted a vivid picture covering 4+ sections:** Go to close. Say: "I can see this person. Let me put them on paper."
 
-**If they give one pain point**, push for one more:
-> "That's a big one. What else? Is there a second thing that compounds it — like it's not just [pain 1], it's also [suggestion]?"
+**If missing key pieces, pick ONE follow-up:**
 
-**If vague** ("They need better tools"):
-> "Can you put me in their shoes? It's 3pm on a Tuesday — what just went wrong? What are they staring at on their screen feeling frustrated about?"
-
-**If stuck**, offer scenarios:
-> "Is it more like: they're wasting time on manual work, they're paying too much for a bad solution, or they're just overwhelmed with options and don't know where to start?"
-
-**Skip rule:** Need at least 1 pain point. Can skip getting a second/third.
-
-**Emit `pain-points`. Transition:**
-> "So [name] is dealing with [pain summary]. When they go looking for help, what do they actually type?"
+| Missing | Follow-up |
+|---------|-----------|
+| `pain-points` | "What's the moment where they think 'this is ridiculous'?" |
+| `language-patterns` | "When they're frustrated and hit Google at midnight — what do they type?" |
+| `current-alternatives` | "What's the janky workaround they're using today?" |
+| `motivation-triggers` | "What finally makes them go looking for a solution?" |
 
 ---
 
-### Q3 → Captures: `language-patterns` (60 sec)
+## Synthesis
 
-**Ask:**
-> "When [name] is fed up and hits Google at midnight — what do they actually search? Give me the exact words they'd type."
+No synthesis section here — all 5 sections come from the user's description. But you can strengthen thin sections by inferring from what they said. If `language-patterns` is weak, generate plausible search queries from the pain points.
 
-**If vague** ("Best tool for [category]"):
-> "Get more specific — do they search by problem or by solution? Is it 'how to fix [thing]' or 'best [tool type] for [niche]'? Or are they on Reddit asking 'has anyone found a good [thing]?'"
+After emitting all content sections, emit `agent-directives`:
 
-**If stuck**, generate examples and confirm:
-> "I'd guess they're searching things like '[example query 1]' or '[example query 2]' — am I warm?"
+```
+<section_update>
+{"section": "agent-directives", "title": "Agent Directives", "content": "AUDIENCE RULES:\n- You are talking to [persona name]-type people: [role], [age range], [situation]\n- Their #1 frustration is: [top pain point]\n- They describe their problem as: '[their exact language]' — use THEIR words, not jargon\n- Words they use: [keywords]. Words to avoid: [jargon they don't use]\n- They are currently using: [alternatives] — acknowledge this when relevant\n- They act when: [trigger event]\n- Their emotional state when they find us: [state]\n- Never assume they know: [thing]. Always assume they care about: [thing]"}
+</section_update>
+```
 
-**Also try:**
-> "How do they describe this problem to a coworker? Like, what's the actual phrase they'd use in a Slack message?"
+Generate directives from the actual content captured — don't use placeholders.
 
-**Skip rule:** Can skip. Generate plausible search queries from the pain points.
-
-**Emit `language-patterns`. Transition:**
-> "And right now — before they find you — what are they doing instead?"
+**Readback:**
+> "Here's your customer: [Name], a [role] dealing with [core pain], currently [workaround], and they finally act when [trigger]. Your persona doc is in the sidebar."
 
 ---
 
-### Q4 → Captures: `current-alternatives` (60 sec)
+## Close
 
-**Ask:**
-> "How is [name] dealing with this today? What's the janky workaround or the tool they're using that doesn't quite cut it?"
-
-**If vague** ("They're just not doing it"):
-> "So it's more of a 'suffer in silence' situation? Or are they cobbling something together with spreadsheets, manual processes, a cheaper tool that's frustrating?"
-
-**If stuck**, offer options:
-> "Usually people are either: using a competitor that's too expensive or complex, DIY-ing it with spreadsheets and duct tape, or just ignoring the problem. Which is closest?"
-
-**Skip rule:** Can skip. Note "No established alternative — greenfield opportunity."
-
-**Emit `current-alternatives`. Transition:**
-> "Last thing — what finally makes them say 'okay I need to do something about this'?"
-
----
-
-### Q5 → Captures: `motivation-triggers` + Readback (60 sec)
-
-**Ask:**
-> "What's the breaking point? What happens that makes [name] finally go looking for a solution like yours?"
-
-**If vague**, offer triggers:
-> "Is it usually a specific event — like they lose a client, miss a deadline, get yelled at by their boss? Or is it more gradual — they just hit a wall one day?"
-
-**If stuck**, generate it:
-> "Based on what you've told me, I'd guess the trigger is [scenario]. Does that track?"
-
-**Emit `motivation-triggers`, then readback:**
-
-> "Alright — here's [persona name] in a nutshell: They're a [role] dealing with [core pain]. They're currently [workaround] and the thing that finally pushes them to act is [trigger]. The full persona doc is in your sidebar. Download or edit anything. See you next session."
-
----
-
-## Timing Budget
-
-| Phase | Time |
-|-------|------|
-| Open | 15 sec |
-| Q1 (persona profile) | 75 sec |
-| Q2 (pain points) | 75 sec |
-| Q3 (language patterns) | 60 sec |
-| Q4 (current alternatives) | 60 sec |
-| Q5 (motivation + readback) | 60 sec |
-| Close | 10 sec |
-| **Total** | **~6 min** |
-
-If past 6 minutes after Q3, skip Q4, infer alternatives from pain points, and go to Q5.
+> "Edit anything, download when you're ready. See you next time."
