@@ -26,10 +26,10 @@ const AGENTS = [
 ];
 
 const DEFAULT_MODULES = [
-  { id: 'positioning', label: 'Brand Positioning', duration: '15m' },
-  { id: 'voice-tone', label: 'Voice & Tone', duration: '10m' },
-  { id: 'persona', label: 'Persona Development', duration: '20m' },
-  { id: 'vision-values', label: 'Vision & Values', duration: '15m' },
+  { id: 'positioning', label: 'Brand Positioning', duration: '5 min', description: 'For your website, pitch decks & investor intros' },
+  { id: 'voice-tone', label: 'Voice & Tone', duration: '5 min', description: 'Train any AI to write in your exact brand voice' },
+  { id: 'persona', label: 'Brand Persona', duration: '5 min', description: 'For ads, landing pages & product decisions' },
+  { id: 'vision-values', label: 'Vision & Values', duration: '5 min', description: 'For hiring pages, culture decks & fundraising' },
 ];
 
 interface SidebarProps {
@@ -79,6 +79,7 @@ export default function Sidebar({ onStartSession, onAgentChange, onModulesChange
                 key={mod.id}
                 label={mod.label}
                 duration={mod.duration}
+                description={mod.description}
                 checked={activeModule === mod.id}
                 onChange={() => handleModuleSelect(mod.id)}
               />

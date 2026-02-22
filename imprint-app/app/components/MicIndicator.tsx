@@ -130,8 +130,11 @@ export default function MicIndicator({
             </svg>
           )}
 
-          <span className="font-inter text-[13.6px] font-semibold" style={{ color: textColor }}>
-            {label}
+          <span
+            className="font-inter text-[13.6px] font-semibold transition-all duration-300"
+            style={{ color: isMuted ? 'rgba(248,113,113,0.9)' : textColor }}
+          >
+            {isMuted && micState === 'LISTENING' ? 'Muted' : label}
           </span>
         </div>
 
@@ -149,10 +152,16 @@ export default function MicIndicator({
                   title={isMuted ? 'Unmute mic' : 'Mute mic'}
                   className={`flex size-8 items-center justify-center rounded-full transition-colors hover:bg-white/10 ${isMuted ? 'text-red-400' : 'text-white'}`}
                 >
-                  {isMuted
-                    ? <MicOffIcon className="w-5 h-5" />
-                    : <MicrophoneIcon className="w-5 h-5" />
-                  }
+                    {isMuted ? (
+                    <div className="relative">
+                      <MicOffIcon className="w-5 h-5 text-red-400" />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-[18px] h-[1.5px] bg-red-400 rotate-45 rounded-full" />
+                      </div>
+                    </div>
+                  ) : (
+                    <MicrophoneIcon className="w-5 h-5" />
+                  )}
                 </button>
               )}
               {onPause && (

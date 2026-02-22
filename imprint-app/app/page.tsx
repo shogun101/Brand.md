@@ -38,6 +38,8 @@ export default function HomePage() {
   const conversationRef = useRef<ConversationHandle | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const sessionActiveRef = useRef(false);
+  // Forward ref so handleStartSession can call handleEndSession (declared later)
+  const handleEndSessionRef = useRef<() => Promise<void>>(async () => {});
 
   // Audio level monitoring refs
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -301,14 +303,15 @@ export default function HomePage() {
           if (status === 'connecting') setMicState('READY');
           if (status === 'connected') setMicState('LISTENING');
           if (status === 'disconnected') {
+            // Guard: if user already clicked End, state is 'complete' — don't double-fire
+            const currentState = useSessionStore.getState().state;
+            if (currentState !== 'active') return;
             const elapsed = useSessionStore.getState().elapsedSeconds;
-            stopTimer();
             if (elapsed >= 30) {
-              sessionActiveRef.current = false;
-              stopLevelMonitor();
-              setState('complete');
-              setMicState('READY');
+              // Agent ended the session naturally — treat same as user clicking End
+              void handleEndSessionRef.current();
             } else {
+              stopTimer();
               setState('active');
               setMicState('LISTENING');
               useBrowserFallback(prompt);
@@ -432,6 +435,8 @@ export default function HomePage() {
       setState('complete');
     }
   }, [setState, setMicState, stopTimer, stopLevelMonitor]);
+  // Keep the forward ref in sync so handleStartSession always calls the latest version
+  handleEndSessionRef.current = handleEndSession;
 
   const handleNewSession = useCallback(() => {
     reset();

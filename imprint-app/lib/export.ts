@@ -70,11 +70,20 @@ version: 1
 
   const moduleTitle = getModuleTitle(session.module);
 
-  const sections = Object.entries(session.document)
+  const regularEntries = Object.entries(session.document).filter(([key]) => key !== 'agent-directives');
+  const directivesEntry = session.document['agent-directives'];
+
+  const sections = regularEntries
     .map(([, data]) => `## ${data.title}\n\n${data.content}`)
     .join('\n\n');
 
-  return frontmatter + `# ${moduleTitle} — ${session.brand_name}\n\n` + sections;
+  let body = `# ${moduleTitle} — ${session.brand_name}\n\n` + sections;
+
+  if (directivesEntry) {
+    body += `\n\n## Agent Directives\n\n\`\`\`\n${directivesEntry.content}\n\`\`\``;
+  }
+
+  return frontmatter + body;
 }
 
 function buildMetadata(session: ExportSession): string {

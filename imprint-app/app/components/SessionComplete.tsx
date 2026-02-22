@@ -27,7 +27,8 @@ function getModuleTitle(module: string): string {
 }
 
 /** Build the preview markdown string — same content as the downloaded .md file,
- *  but WITHOUT the YAML frontmatter block so it reads cleanly as a document. */
+ *  but WITHOUT the YAML frontmatter block so it reads cleanly as a document.
+ *  `agent-directives` section is rendered last as a fenced code block. */
 function buildPreviewMarkdown(
   sections: Record<string, SectionData>,
   moduleKey: string,
@@ -36,11 +37,20 @@ function buildPreviewMarkdown(
   const moduleTitle = getModuleTitle(moduleKey);
   const name = brandName || 'My Brand';
 
-  const sectionsMd = Object.entries(sections)
+  const regularEntries = Object.entries(sections).filter(([key]) => key !== 'agent-directives');
+  const directivesEntry = sections['agent-directives'];
+
+  const sectionsMd = regularEntries
     .map(([, data]) => `## ${data.title}\n\n${data.content}`)
     .join('\n\n');
 
-  return `# ${moduleTitle} — ${name}\n\n${sectionsMd}`;
+  let result = `# ${moduleTitle} — ${name}\n\n${sectionsMd}`;
+
+  if (directivesEntry) {
+    result += `\n\n## Agent Directives\n\n\`\`\`\n${directivesEntry.content}\n\`\`\``;
+  }
+
+  return result;
 }
 
 export default function SessionComplete({ sections, isGenerating = false, onNewSession }: SessionCompleteProps) {
