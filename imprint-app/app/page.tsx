@@ -278,7 +278,8 @@ export default function HomePage() {
           if (status === 'disconnected') {
             const elapsed = useSessionStore.getState().elapsedSeconds;
             stopTimer();
-            if (elapsed >= 5) {
+            if (elapsed >= 30) {
+              // Session ran long enough — treat as normal end
               sessionActiveRef.current = false;
               stopLevelMonitor();
               setState('complete');
