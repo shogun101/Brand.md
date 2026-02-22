@@ -20,6 +20,8 @@ export interface ElevenLabsConfig {
   onStatusChange: (status: { status: string }) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onError: (message: string, context?: any) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onDebug?: (event: any) => void;
 }
 
 export async function startConversation(config: ElevenLabsConfig) {
@@ -49,6 +51,8 @@ export async function startConversation(config: ElevenLabsConfig) {
     onModeChange: config.onModeChange,
     onStatusChange: config.onStatusChange,
     onError: config.onError,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onDebug: config.onDebug ?? ((_e: any) => {}),
   });
 
   return conversation;

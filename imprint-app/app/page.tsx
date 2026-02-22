@@ -63,6 +63,8 @@ export default function HomePage() {
     toggleAudio,
     audioLevel,
     setAudioLevel,
+    isGenerating,
+    setGenerating,
     reset,
   } = useSessionStore();
 
@@ -254,17 +256,40 @@ export default function HomePage() {
         moduleKey: selectedModules[0] || undefined,
         systemPrompt: prompt,
         onMessage: (msg) => {
+          // ── Plan B: parse <section_update> blocks from final agent response ──
+          // Note: ElevenLabs may or may not include these in agent_response
+          // (tentative responses via onDebug are the primary parsing path).
+          // We parse here too as a belt-and-suspenders measure.
+          if (msg.source === 'ai') {
+            console.log('[ElevenLabs onMessage raw]', msg.message.substring(0, 400));
+            const updates = parseSectionUpdates(msg.message);
+            if (updates.length > 0) {
+              console.log('[ElevenLabs onMessage] sections found:', updates);
+              updates.forEach((u) =>
+                addSection(u.section, { title: u.title, content: u.content })
+              );
+            }
+          }
           const cleanText = msg.message
             .replace(/<section_update>[\s\S]*?<\/section_update>/g, '')
             .trim();
           if (cleanText) {
             addTranscript(msg.source === 'ai' ? 'ai' : 'user', cleanText);
           }
-          if (msg.source === 'ai') {
-            const updates = parseSectionUpdates(msg.message);
-            updates.forEach((u) =>
-              addSection(u.section, { title: u.title, content: u.content })
-            );
+        },
+        // ── Plan B PRIMARY: parse sections from streaming tentative responses ──
+        // ElevenLabs streams the LLM output via onDebug before finalizing.
+        // The <section_update> blocks appear here even if stripped from agent_response.
+        onDebug: (event) => {
+          if (event?.type === 'tentative_agent_response' && typeof event.response === 'string') {
+            console.log('[ElevenLabs tentative]', event.response.substring(0, 400));
+            const updates = parseSectionUpdates(event.response);
+            if (updates.length > 0) {
+              console.log('[ElevenLabs tentative] sections found:', updates);
+              updates.forEach((u) =>
+                addSection(u.section, { title: u.title, content: u.content })
+              );
+            }
           }
         },
         onModeChange: ({ mode }) => {
@@ -349,8 +374,49 @@ export default function HomePage() {
     } else if (conv?._recognition) {
       conv._recognition.stop();
     }
-    setState('complete');
     setMicState('READY');
+
+    // ── Plan A: GPT-4o fallback ───────────────────────────────────────────
+    // If no sections were captured during the live session (Plan B didn't fire)
+    // but we have transcript content, auto-generate sections from GPT-4o.
+    const storeState = useSessionStore.getState();
+    const hasSections = Object.keys(storeState.sections).length > 0;
+    const hasTranscript = storeState.transcript.length > 0;
+
+    if (!hasSections && hasTranscript) {
+      // Show SessionComplete immediately so user sees the panel (loading state)
+      setState('complete');
+      storeState.setGenerating(true);
+      try {
+        const res = await fetch('/api/generate-sections', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            transcript: storeState.transcript.map((e) => ({
+              source: e.role,
+              message: e.text,
+            })),
+            moduleKey: storeState.selectedModules[0] || 'positioning',
+            agentKey: storeState.selectedAgent,
+            brandName: storeState.brandName,
+          }),
+        });
+        const data: { sections?: Record<string, { title: string; content: string }> } =
+          await res.json();
+        if (data.sections) {
+          console.log('[Plan A] GPT-4o generated sections:', Object.keys(data.sections));
+          Object.entries(data.sections).forEach(([slug, section]) => {
+            useSessionStore.getState().addSection(slug, section);
+          });
+        }
+      } catch (e) {
+        console.error('[Plan A] Section generation failed:', e);
+      } finally {
+        useSessionStore.getState().setGenerating(false);
+      }
+    } else {
+      setState('complete');
+    }
   }, [setState, setMicState, stopTimer, stopLevelMonitor]);
 
   const handleNewSession = useCallback(() => {
@@ -415,6 +481,7 @@ export default function HomePage() {
           {state === 'complete' && (
             <SessionComplete
               sections={sections}
+              isGenerating={isGenerating}
               onNewSession={handleNewSession}
             />
           )}

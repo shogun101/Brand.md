@@ -49,6 +49,10 @@ interface SessionStore {
   audioLevel: number;
   setAudioLevel: (level: number) => void;
 
+  /** Plan A: true while GPT-4o is generating sections from transcript */
+  isGenerating: boolean;
+  setGenerating: (v: boolean) => void;
+
   reset: () => void;
 }
 
@@ -107,6 +111,9 @@ export const useSessionStore = create<SessionStore>((set) => ({
   audioLevel: 0,
   setAudioLevel: (level) => set({ audioLevel: level }),
 
+  isGenerating: false,
+  setGenerating: (v) => set({ isGenerating: v }),
+
   reset: () =>
     set({
       state: 'idle',
@@ -120,5 +127,6 @@ export const useSessionStore = create<SessionStore>((set) => ({
       sections: {},
       transcript: [],
       audioLevel: 0,
+      isGenerating: false,
     }),
 }));

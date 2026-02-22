@@ -1,6 +1,6 @@
 'use client';
 import ReactMarkdown from 'react-markdown';
-import { ArrowDownTrayIcon, ArrowPathIcon, DocumentIcon } from '@heroicons/react/24/outline';
+import { ArrowDownTrayIcon, ArrowPathIcon, DocumentIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 import { generateExportZip, downloadZip, buildModuleFile } from '@/lib/export';
 import { useSessionStore } from '@/lib/session-store';
 
@@ -11,6 +11,7 @@ interface SectionData {
 
 interface SessionCompleteProps {
   sections: Record<string, SectionData>;
+  isGenerating?: boolean;
   onNewSession?: () => void;
 }
 
@@ -42,7 +43,7 @@ function buildPreviewMarkdown(
   return `# ${moduleTitle} — ${name}\n\n${sectionsMd}`;
 }
 
-export default function SessionComplete({ sections, onNewSession }: SessionCompleteProps) {
+export default function SessionComplete({ sections, isGenerating = false, onNewSession }: SessionCompleteProps) {
   const { selectedAgent, selectedModules, brandName, elapsedSeconds, sessionId } =
     useSessionStore();
 
@@ -87,6 +88,8 @@ export default function SessionComplete({ sections, onNewSession }: SessionCompl
           <p className="mt-1 font-inter text-[13px] text-[#8E8E93]">
             {hasSections
               ? `${sectionEntries.length} section${sectionEntries.length > 1 ? 's' : ''} captured — review and download`
+              : isGenerating
+              ? 'Pulling key insights from your conversation…'
               : 'Session ended — download includes session metadata'}
           </p>
         </div>
@@ -178,6 +181,21 @@ export default function SessionComplete({ sections, onNewSession }: SessionCompl
               </ReactMarkdown>
             </div>
           </>
+        ) : isGenerating ? (
+          /* ── Plan A: GPT-4o generating sections ── */
+          <div className="flex flex-col items-center justify-center h-full gap-4 text-center">
+            <div className="flex size-12 items-center justify-center rounded-full border border-neutral-700 bg-neutral-800/60 animate-pulse">
+              <DocumentTextIcon className="size-5 text-neutral-400" />
+            </div>
+            <div className="space-y-1.5">
+              <p className="font-inter text-[15px] font-medium text-neutral-200">
+                Building your document…
+              </p>
+              <p className="font-inter text-[13px] leading-[20px] text-neutral-500 max-w-[240px]">
+                Pulling key insights from your conversation.
+              </p>
+            </div>
+          </div>
         ) : (
           /* ── Early-exit stub ── informative, never a dead-end */
           <div className="flex flex-col items-center justify-center h-full gap-4 text-center">
