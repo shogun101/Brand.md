@@ -22,6 +22,8 @@ interface SessionStore {
   selectedAgent: string;
   selectedModules: string[];
   setAgent: (a: string) => void;
+  /** Single-select: set the one active module */
+  setSelectedModule: (m: string) => void;
   toggleModule: (m: string) => void;
 
   sessionId: string | null;
@@ -57,6 +59,9 @@ export const useSessionStore = create<SessionStore>((set) => ({
   selectedAgent: 'strategist',
   selectedModules: ['positioning'],
   setAgent: (a) => set({ selectedAgent: a }),
+
+  setSelectedModule: (m) => set({ selectedModules: [m] }),
+
   toggleModule: (m) =>
     set((s) => ({
       selectedModules: s.selectedModules.includes(m)

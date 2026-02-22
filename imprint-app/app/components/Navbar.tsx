@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 
 interface NavbarProps {
   activeLink?: string;
@@ -9,8 +10,13 @@ interface NavbarProps {
 export default function Navbar({ activeLink, onSessionsClick }: NavbarProps) {
   return (
     <nav className="absolute inset-x-0 top-0 z-50 flex h-[56px] items-center justify-between border-b border-neutral-800 bg-brand-dark px-6">
-      {/* Logo — Brand.md in Awesome Serif */}
-      <span className="font-awesome-serif text-[18px] text-white">Brand.md</span>
+      {/* Logo — clicking navigates home */}
+      <Link
+        href="/"
+        className="font-awesome-serif text-[18px] text-white transition-opacity hover:opacity-80"
+      >
+        Brand.md
+      </Link>
 
       {/* Right links + avatar */}
       <div className="flex items-center gap-5">

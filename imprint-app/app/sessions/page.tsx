@@ -1,6 +1,6 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { FileText } from 'lucide-react';
+import { DocumentTextIcon } from '@heroicons/react/24/outline';
 import Navbar from '../components/Navbar';
 
 interface MockSession {
@@ -54,12 +54,12 @@ function SessionCard({ session, onClick }: { session: MockSession; onClick: () =
   return (
     <div
       onClick={onClick}
-      className="cursor-pointer bg-brand-sidebar transition-colors hover:bg-[#222] p-5"
+      className="cursor-pointer transition-colors hover:bg-white/[0.03] p-5"
     >
       <div className="flex gap-5">
-        {/* Icon badge — circular, white opacity */}
+        {/* Icon badge */}
         <div className="flex size-11 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5">
-          <FileText size={20} className="text-white/60" fill="currentColor" />
+          <DocumentTextIcon className="size-5 text-white/60" />
         </div>
 
         {/* Content */}
@@ -93,7 +93,8 @@ export default function SessionsPage() {
   const router = useRouter();
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden bg-brand-sidebar">
+    /* bg-brand-surface matches homepage dark background (#141414) */
+    <div className="relative h-screen w-screen overflow-hidden bg-brand-surface">
       <Navbar
         activeLink="sessions"
         onSessionsClick={() => router.push('/sessions')}
@@ -104,7 +105,7 @@ export default function SessionsPage() {
         className="absolute inset-x-0 bottom-0 overflow-y-auto"
         style={{ top: '56px' }}
       >
-        <div className="mx-auto max-w-[800px] px-6 py-[60px]">
+        <div className="mx-auto max-w-[800px] px-8 py-[60px]">
           {/* Header */}
           <div className="mb-10">
             <h1 className="font-awesome-serif text-[27.1px] text-neutral-50">
@@ -116,10 +117,7 @@ export default function SessionsPage() {
           </div>
 
           {/* Session cards container */}
-          <div
-            className="overflow-hidden rounded-[12px] border border-neutral-800"
-            style={{ background: '#2a2a2a' }}
-          >
+          <div className="overflow-hidden rounded-[12px] border border-neutral-800 bg-[#1c1c1c]">
             {MOCK_SESSIONS.map((session, index) => (
               <div key={session.id}>
                 {index > 0 && <div className="h-px bg-neutral-800" />}

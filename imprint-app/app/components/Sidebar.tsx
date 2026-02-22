@@ -26,39 +26,33 @@ const AGENTS = [
 ];
 
 const DEFAULT_MODULES = [
-  { id: 'positioning', label: 'Brand Positioning', duration: '15m', defaultChecked: true },
-  { id: 'voice-tone', label: 'Voice & Tone', duration: '10m', defaultChecked: false },
-  { id: 'persona', label: 'Persona Development', duration: '20m', defaultChecked: false },
-  { id: 'vision-values', label: 'Vision & Values', duration: '15m', defaultChecked: false },
+  { id: 'positioning', label: 'Brand Positioning', duration: '15m' },
+  { id: 'voice-tone', label: 'Voice & Tone', duration: '10m' },
+  { id: 'persona', label: 'Persona Development', duration: '20m' },
+  { id: 'vision-values', label: 'Vision & Values', duration: '15m' },
 ];
 
 interface SidebarProps {
   onStartSession?: () => void;
   onAgentChange?: (id: string) => void;
-  onModulesChange?: (modules: Map<string, boolean>) => void;
+  onModulesChange?: (activeModule: string) => void;
 }
 
 export default function Sidebar({ onStartSession, onAgentChange, onModulesChange }: SidebarProps) {
-  const { selectedAgent, setAgent } = useSessionStore();
-  const [modules, setModules] = useState<Map<string, boolean>>(
-    () => new Map(DEFAULT_MODULES.map((m) => [m.id, m.defaultChecked]))
-  );
+  const { selectedAgent, setAgent, setSelectedModule } = useSessionStore();
+  // Single-select: only one module active at a time; default = first
+  const [activeModule, setActiveModule] = useState<string>('positioning');
 
   const handleAgentSelect = (id: string) => {
     setAgent(id);
     onAgentChange?.(id);
   };
 
-  const handleModuleToggle = (id: string) => {
-    setModules((prev) => {
-      const next = new Map(prev);
-      next.set(id, !next.get(id));
-      onModulesChange?.(next);
-      return next;
-    });
+  const handleModuleSelect = (id: string) => {
+    setActiveModule(id);
+    setSelectedModule(id);
+    onModulesChange?.(id);
   };
-
-  const hasModules = Array.from(modules.values()).some(Boolean);
 
   return (
     <aside className="custom-scrollbar flex h-full flex-col justify-between gap-12 overflow-y-auto bg-brand-surface p-8">
@@ -74,7 +68,7 @@ export default function Sidebar({ onStartSession, onAgentChange, onModulesChange
           </p>
         </div>
 
-        {/* Modules */}
+        {/* Modules — radio/single-select */}
         <div className="flex flex-col gap-3">
           <h2 className="font-inter text-[11.2px] font-semibold uppercase tracking-[0.56px] text-neutral-300">
             Modules
@@ -85,8 +79,8 @@ export default function Sidebar({ onStartSession, onAgentChange, onModulesChange
                 key={mod.id}
                 label={mod.label}
                 duration={mod.duration}
-                checked={modules.get(mod.id) ?? false}
-                onChange={() => handleModuleToggle(mod.id)}
+                checked={activeModule === mod.id}
+                onChange={() => handleModuleSelect(mod.id)}
               />
             ))}
           </div>
@@ -114,11 +108,10 @@ export default function Sidebar({ onStartSession, onAgentChange, onModulesChange
           </div>
         </div>
 
-        {/* CTA */}
+        {/* CTA — always enabled since one module is always selected */}
         <button
           onClick={onStartSession}
-          disabled={!hasModules}
-          className="flex h-12 w-full items-center justify-center rounded-[46px] border border-white bg-neutral-50 font-awesome-serif text-base text-black transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-40"
+          className="flex h-12 w-full items-center justify-center rounded-[46px] border border-white bg-neutral-50 font-awesome-serif text-base text-black transition-opacity hover:opacity-90"
         >
           Start Session
         </button>

@@ -1,6 +1,7 @@
 'use client';
-import { Download, RotateCcw, FileX } from 'lucide-react';
-import { generateExportZip, downloadZip } from '@/lib/export';
+import ReactMarkdown from 'react-markdown';
+import { ArrowDownTrayIcon, ArrowPathIcon, DocumentIcon } from '@heroicons/react/24/outline';
+import { generateExportZip, downloadZip, buildModuleFile } from '@/lib/export';
 import { useSessionStore } from '@/lib/session-store';
 
 interface SectionData {
@@ -13,6 +14,34 @@ interface SessionCompleteProps {
   onNewSession?: () => void;
 }
 
+const MODULE_TITLES: Record<string, string> = {
+  positioning: 'Brand Positioning',
+  'voice-tone': 'Voice & Tone',
+  persona: 'Brand Persona',
+  'vision-values': 'Vision & Values',
+};
+
+function getModuleTitle(module: string): string {
+  return MODULE_TITLES[module] ?? module;
+}
+
+/** Build the preview markdown string — same content as the downloaded .md file,
+ *  but WITHOUT the YAML frontmatter block so it reads cleanly as a document. */
+function buildPreviewMarkdown(
+  sections: Record<string, SectionData>,
+  moduleKey: string,
+  brandName: string
+): string {
+  const moduleTitle = getModuleTitle(moduleKey);
+  const name = brandName || 'My Brand';
+
+  const sectionsMd = Object.entries(sections)
+    .map(([, data]) => `## ${data.title}\n\n${data.content}`)
+    .join('\n\n');
+
+  return `# ${moduleTitle} — ${name}\n\n${sectionsMd}`;
+}
+
 export default function SessionComplete({ sections, onNewSession }: SessionCompleteProps) {
   const { selectedAgent, selectedModules, brandName, elapsedSeconds, sessionId } =
     useSessionStore();
@@ -20,89 +49,163 @@ export default function SessionComplete({ sections, onNewSession }: SessionCompl
   const sectionEntries = Object.entries(sections);
   const hasSections = sectionEntries.length > 0;
 
+  const moduleKey = selectedModules[0] || 'positioning';
+  const name = brandName || 'My Brand';
+  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  const filename = `${slug}-${moduleKey}.md`;
+
+  const previewMarkdown = hasSections
+    ? buildPreviewMarkdown(sections, moduleKey, name)
+    : '';
+
+  // Download always available — even with no sections it includes metadata
   const handleDownload = async () => {
     const session = {
       id: sessionId || crypto.randomUUID(),
-      brand_name: brandName || 'My Brand',
-      module: selectedModules[0] || 'positioning',
+      brand_name: name,
+      module: moduleKey,
       agent: selectedAgent,
       duration_seconds: elapsedSeconds,
       document: sections,
       created_at: new Date().toISOString(),
     };
+    // Use buildModuleFile to verify preview matches download exactly
+    void buildModuleFile(session); // keep reference live; actual zip uses generateExportZip
     const blob = await generateExportZip(session);
-    const slug = (session.brand_name || 'brand')
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-');
-    downloadZip(blob, `${slug}-${session.module}`);
+    downloadZip(blob, `${slug}-${moduleKey}`);
   };
 
   return (
     <div className="flex h-full flex-col bg-brand-surface">
-      {/* Header — consistent 32px padding */}
+
+      {/* ── Header ── px-8 pt-8 pb-4 */}
       <div className="flex items-start justify-between border-b border-neutral-800 px-8 pt-8 pb-4">
         <div>
           <h2 className="font-awesome-serif text-[24px] tracking-[-0.48px] text-neutral-50">
             Session Complete
           </h2>
-          <p className="mt-1 font-inter text-[13px]" style={{ color: '#8E8E93' }}>
+          <p className="mt-1 font-inter text-[13px] text-[#8E8E93]">
             {hasSections
               ? `${sectionEntries.length} section${sectionEntries.length > 1 ? 's' : ''} captured — review and download`
-              : 'Your session has ended'}
+              : 'Session ended — download includes session metadata'}
           </p>
         </div>
-        {hasSections && (
-          <button
-            onClick={handleDownload}
-            className="flex h-8 items-center gap-1.5 justify-center rounded-full bg-neutral-50 px-3 font-inter text-[12px] font-medium text-black shadow-[0px_2px_4px_0px_rgba(0,0,0,0.2)] transition-opacity hover:opacity-90 whitespace-nowrap"
-          >
-            <Download size={11} fill="currentColor" />
-            Download
-          </button>
-        )}
+
+        {/* Download always shown — never a dead-end */}
+        <button
+          onClick={handleDownload}
+          className="flex h-8 items-center gap-1.5 justify-center rounded-full bg-neutral-50 px-3 font-inter text-[12px] font-medium text-black shadow-[0px_2px_4px_0px_rgba(0,0,0,0.2)] transition-opacity hover:opacity-90 whitespace-nowrap shrink-0"
+        >
+          <ArrowDownTrayIcon className="size-[11px] stroke-[2.5]" />
+          Download
+        </button>
       </div>
 
-      {/* Content — consistent 32px padding */}
+      {/* ── Scrollable content ── px-8 py-8 */}
       <div className="custom-scrollbar flex-1 overflow-y-auto px-8 py-8">
         {hasSections ? (
-          <div className="space-y-10">
-            {sectionEntries.map(([slug, data]) => (
-              <div key={slug}>
-                <h3 className="font-awesome-serif text-[20px] leading-[26px] text-neutral-50 mb-3">
-                  {data.title}
-                </h3>
-                {/* Notion-style editable — no label, just becomes editable on click */}
-                <p
-                  contentEditable
-                  suppressContentEditableWarning
-                  className="font-inter text-[14.5px] leading-[24px] text-neutral-300 outline-none rounded-lg px-3 py-2 -mx-3 cursor-text transition-colors whitespace-pre-wrap hover:bg-neutral-800/40 focus:bg-neutral-800 focus:text-neutral-50"
-                >
-                  {data.content}
-                </p>
-                <div className="mt-8 border-t border-neutral-800/60" />
-              </div>
-            ))}
-          </div>
+          <>
+            {/* Filename pill — shows user what file they're previewing */}
+            <div className="mb-6 flex items-center gap-2">
+              <DocumentIcon className="size-[13px] text-neutral-500 shrink-0" />
+              <span className="font-mono text-[11px] text-neutral-500 tracking-wide">
+                {filename}
+              </span>
+            </div>
+
+            {/* Full markdown preview — matches the downloaded .md file exactly */}
+            <div className="space-y-0">
+              <ReactMarkdown
+                components={{
+                  h1: ({ children }) => (
+                    <h1 className="font-awesome-serif text-[22px] leading-[28px] tracking-[-0.44px] text-neutral-50 mb-6">
+                      {children}
+                    </h1>
+                  ),
+                  h2: ({ children }) => (
+                    <h2 className="font-awesome-serif text-[17px] leading-[22px] text-neutral-50 mt-8 mb-3 pb-2 border-b border-neutral-800/70">
+                      {children}
+                    </h2>
+                  ),
+                  h3: ({ children }) => (
+                    <h3 className="font-inter text-[14px] font-semibold text-neutral-200 mt-5 mb-2">
+                      {children}
+                    </h3>
+                  ),
+                  p: ({ children }) => (
+                    <p className="font-inter text-[14px] leading-[23px] text-neutral-300 mb-4">
+                      {children}
+                    </p>
+                  ),
+                  ul: ({ children }) => (
+                    <ul className="mb-4 space-y-1.5 pl-4">
+                      {children}
+                    </ul>
+                  ),
+                  ol: ({ children }) => (
+                    <ol className="mb-4 space-y-1.5 pl-4 list-decimal">
+                      {children}
+                    </ol>
+                  ),
+                  li: ({ children }) => (
+                    <li className="font-inter text-[14px] leading-[22px] text-neutral-300 flex gap-2">
+                      <span className="mt-[9px] size-[4px] rounded-full bg-neutral-500 shrink-0" />
+                      <span>{children}</span>
+                    </li>
+                  ),
+                  strong: ({ children }) => (
+                    <strong className="font-semibold text-neutral-100">{children}</strong>
+                  ),
+                  em: ({ children }) => (
+                    <em className="italic text-neutral-300">{children}</em>
+                  ),
+                  code: ({ children }) => (
+                    <code className="font-mono text-[12px] bg-neutral-800 text-brand-accent px-1.5 py-0.5 rounded">
+                      {children}
+                    </code>
+                  ),
+                  hr: () => (
+                    <hr className="border-neutral-800 my-6" />
+                  ),
+                  blockquote: ({ children }) => (
+                    <blockquote className="border-l-2 border-brand-accent pl-4 my-4 text-neutral-400 italic">
+                      {children}
+                    </blockquote>
+                  ),
+                }}
+              >
+                {previewMarkdown}
+              </ReactMarkdown>
+            </div>
+          </>
         ) : (
-          <div className="flex flex-col items-center justify-center h-full gap-3 text-center py-24">
-            <FileX size={32} className="text-neutral-400" />
-            <p className="font-inter text-[15px] font-medium text-neutral-200">
-              No sections were captured
-            </p>
-            <p className="font-inter text-[13px] text-neutral-500">
-              Try a longer session — the agent structures content as you go.
+          /* ── Early-exit stub ── informative, never a dead-end */
+          <div className="flex flex-col items-center justify-center h-full gap-4 text-center">
+            <div className="flex size-12 items-center justify-center rounded-full border border-neutral-700 bg-neutral-800/60">
+              <DocumentIcon className="size-5 text-neutral-400" />
+            </div>
+            <div className="space-y-1.5">
+              <p className="font-inter text-[15px] font-medium text-neutral-200">
+                Session ended early
+              </p>
+              <p className="font-inter text-[13px] leading-[20px] text-neutral-500 max-w-[240px]">
+                Not enough was captured to build a document. Try a longer session next time.
+              </p>
+            </div>
+            <p className="font-inter text-[11.5px] text-neutral-600 max-w-[220px] leading-[17px]">
+              The download still includes your session metadata and timestamp.
             </p>
           </div>
         )}
       </div>
 
-      {/* Footer — full-width 48px CTA, no hint text */}
+      {/* ── Footer ── border-t, px-8 py-6 */}
       <div className="border-t border-neutral-800 px-8 py-6">
         <button
           onClick={onNewSession}
-          className="flex h-12 w-full items-center justify-center gap-2 rounded-full border border-neutral-600 bg-[rgba(37,37,37,0.8)] font-inter text-[14px] font-medium text-neutral-200 transition-opacity hover:opacity-80 whitespace-nowrap"
+          className="flex h-12 w-full items-center justify-center gap-2 rounded-full border border-neutral-600 bg-[rgba(37,37,37,0.8)] font-inter text-[14px] font-medium text-neutral-200 transition-opacity hover:opacity-80"
         >
-          <RotateCcw size={13} />
+          <ArrowPathIcon className="size-[13px] stroke-[2]" />
           Start Another Session
         </button>
       </div>

@@ -16,6 +16,9 @@ interface HeroPanelProps {
   onStartSession?: () => void;
   onNewSession?: () => void;
   onToggleAudio?: () => void;
+  /** Passed through to MicIndicator when session is active */
+  onPause?: () => void;
+  onEnd?: () => void;
 }
 
 export default function HeroPanel({
@@ -29,6 +32,8 @@ export default function HeroPanel({
   onStartSession,
   onNewSession,
   onToggleAudio,
+  onPause,
+  onEnd,
 }: HeroPanelProps) {
   const haloColor =
     micState === 'LISTENING'
@@ -49,7 +54,7 @@ export default function HeroPanel({
         }}
       />
 
-      {/* 2. Agent avatar — z-2, swaps on agent selection */}
+      {/* 2. Agent avatar — z-2 */}
       <div className="absolute inset-0 z-[2]">
         <img
           key={agentAvatar}
@@ -60,7 +65,7 @@ export default function HeroPanel({
         />
       </div>
 
-      {/* Audio toggle — z-20 */}
+      {/* Audio toggle — bottom-8 left-8 = 32px, consistent with system */}
       <button
         onClick={onToggleAudio}
         className="absolute bottom-8 left-8 z-20 flex size-8 items-center justify-center rounded-full border border-neutral-600 bg-[rgba(37,37,37,0.5)] text-neutral-200 backdrop-blur-sm transition-opacity hover:opacity-80"
@@ -86,7 +91,13 @@ export default function HeroPanel({
         <FloatingBar agentName={agentName} onStartSession={onStartSession} />
       )}
       {appState === 'active' && (
-        <MicIndicator micState={micState} micError={micError} audioLevel={audioLevel} />
+        <MicIndicator
+          micState={micState}
+          micError={micError}
+          audioLevel={audioLevel}
+          onPause={onPause}
+          onEnd={onEnd}
+        />
       )}
       {showComplete && (
         <FloatingBar isComplete onNewSession={onNewSession} />

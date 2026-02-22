@@ -1,6 +1,6 @@
 import JSZip from 'jszip';
 
-interface ExportSession {
+export interface ExportSession {
   id: string;
   brand_name: string;
   module: string;
@@ -56,7 +56,7 @@ Structured brand files from your ${moduleTitle} session with ${session.agent}. D
 `;
 }
 
-function buildModuleFile(session: ExportSession): string {
+export function buildModuleFile(session: ExportSession): string {
   const frontmatter = `---
 type: ${session.module}
 brand: "${session.brand_name}"

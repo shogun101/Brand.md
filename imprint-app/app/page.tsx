@@ -22,7 +22,7 @@ type ConversationHandle = {
 const AGENT_PROMPTS: Record<string, string> = {
   strategist: strategistPrompt,
   creative: creativePrompt,
-  guide: coachPrompt,   // sidebar uses id='guide', prompt is coachPrompt
+  guide: coachPrompt,
 };
 
 const AGENT_AVATARS: Record<string, string> = {
@@ -98,12 +98,12 @@ export default function HomePage() {
       const loop = () => {
         analyser.getByteFrequencyData(data);
         const avg = data.reduce((a, b) => a + b, 0) / data.length;
-        setAudioLevel(avg / 128); // normalise to 0–1
+        setAudioLevel(avg / 128);
         levelAnimRef.current = requestAnimationFrame(loop);
       };
       loop();
     } catch {
-      // Non-fatal — level monitor failed but session can continue
+      // Non-fatal
     }
   }, [setAudioLevel]);
 
@@ -195,7 +195,7 @@ export default function HomePage() {
       };
 
       recognition.onerror = (e: { error: string }) => {
-        if (e.error === 'no-speech') return;   // non-fatal — keep listening
+        if (e.error === 'no-speech') return;
         if (e.error === 'audio-capture') {
           setMicState('ERROR');
           setMicError('Mic not detected — check your microphone is connected');
@@ -206,7 +206,7 @@ export default function HomePage() {
           setMicError('Mic blocked — allow microphone access in browser settings');
           return;
         }
-        setMicState('LISTENING'); // other errors: stay ready
+        setMicState('LISTENING');
       };
 
       recognition.start();
@@ -219,7 +219,6 @@ export default function HomePage() {
   const handleStartSession = useCallback(async () => {
     setMicError(null);
 
-    // Step 1: Request mic permission and start level monitor
     let micStream: MediaStream | null = null;
     try {
       micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
@@ -241,7 +240,6 @@ export default function HomePage() {
       return;
     }
 
-    // Step 2: Start session
     sessionActiveRef.current = true;
     setState('active');
     setMicState('READY');
@@ -255,7 +253,6 @@ export default function HomePage() {
         moduleKey: selectedModules[0] || undefined,
         systemPrompt: prompt,
         onMessage: (msg) => {
-          // Strip <section_update> blocks before adding to transcript
           const cleanText = msg.message
             .replace(/<section_update>[\s\S]*?<\/section_update>/g, '')
             .trim();
@@ -280,13 +277,11 @@ export default function HomePage() {
             const elapsed = useSessionStore.getState().elapsedSeconds;
             stopTimer();
             if (elapsed >= 30) {
-              // Session ran long enough — treat as normal end
               sessionActiveRef.current = false;
               stopLevelMonitor();
               setState('complete');
               setMicState('READY');
             } else {
-              // Premature disconnect — fall back to browser SpeechRecognition
               setState('active');
               setMicState('LISTENING');
               useBrowserFallback(prompt);
@@ -317,7 +312,29 @@ export default function HomePage() {
     useBrowserFallback,
   ]);
 
+  // ── Pause session ─────────────────────────────────────────────────────────
+  // Mutes mic input and stops SR auto-restart. ElevenLabs connection stays alive.
+  // State remains 'active' — user can still End properly afterward.
+  const handlePauseSession = useCallback(() => {
+    // Stop SpeechRecognition auto-restart loop (fallback path)
+    sessionActiveRef.current = false;
+    const conv = conversationRef.current;
+    if (conv?._recognition) {
+      conv._recognition.stop();
+    }
+    // Stop mic level monitor (releases the visualization stream)
+    stopLevelMonitor();
+    // Pause timer
+    stopTimer();
+    // Signal paused in MicIndicator — READY = not actively listening
+    setMicState('READY');
+    // ElevenLabs conv intentionally NOT disconnected — session stays alive
+  }, [stopLevelMonitor, stopTimer, setMicState]);
+
   // ── End session ───────────────────────────────────────────────────────────
+  // Full disconnect: ElevenLabs + SR fallback both stopped. Goes to 'complete'.
+  // Always transitions to 'complete' regardless of how much was captured —
+  // SessionComplete handles the empty/partial case gracefully.
   const handleEndSession = useCallback(async () => {
     sessionActiveRef.current = false;
     stopTimer();
@@ -364,6 +381,8 @@ export default function HomePage() {
             onStartSession={handleStartSession}
             onNewSession={handleNewSession}
             onToggleAudio={toggleAudio}
+            onPause={handlePauseSession}
+            onEnd={handleEndSession}
           />
           <AvatarCanvas />
         </div>
@@ -382,7 +401,7 @@ export default function HomePage() {
               sections={sections}
               transcript={transcript}
               elapsedSeconds={elapsedSeconds}
-              onPause={handleEndSession}
+              onPause={handlePauseSession}
               onEnd={handleEndSession}
               expectedSections={selectedModules.map((_, i) => `section-${i}`)}
             />

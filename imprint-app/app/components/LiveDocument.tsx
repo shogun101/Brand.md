@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { Pause, StopCircle } from 'lucide-react';
+import { PauseIcon, StopCircleIcon } from '@heroicons/react/24/solid';
+import { Message } from './ui/message';
 import type { TranscriptEntry } from '@/lib/session-store';
 
 interface SectionData {
@@ -85,8 +86,8 @@ export default function LiveDocument({
 
   return (
     <div className="flex h-full flex-col bg-brand-surface">
-      {/* Header */}
-      <div className="flex items-start justify-between border-b border-neutral-800 px-12 pt-12 pb-4">
+      {/* ── Header ── px-8 pt-8 pb-4 matches SessionComplete exactly */}
+      <div className="flex items-start justify-between border-b border-neutral-800 px-8 pt-8 pb-4">
         <div>
           <h2 className="font-awesome-serif text-[24px] tracking-[-0.48px] text-neutral-50">
             Brand Session
@@ -98,13 +99,14 @@ export default function LiveDocument({
             </p>
           </div>
         </div>
-        <div className="flex gap-2">
+
+        <div className="flex items-center gap-2">
           {onPause && (
             <button
               onClick={onPause}
               className="flex h-8 items-center gap-1.5 justify-center rounded-full border border-[#3f3f3f] px-3 font-inter text-[12px] text-neutral-300 transition-opacity hover:opacity-70"
             >
-              <Pause size={11} fill="currentColor" />
+              <PauseIcon className="size-[11px]" />
               Pause
             </button>
           )}
@@ -113,15 +115,15 @@ export default function LiveDocument({
               onClick={onEnd}
               className="flex h-8 items-center gap-1.5 justify-center rounded-full bg-neutral-50 px-3 font-inter text-[12px] text-black shadow-[0px_2px_4px_0px_rgba(0,0,0,0.2)] transition-opacity hover:opacity-90"
             >
-              <StopCircle size={11} fill="currentColor" />
+              <StopCircleIcon className="size-[11px]" />
               End
             </button>
           )}
         </div>
       </div>
 
-      {/* Content */}
-      <div className="custom-scrollbar flex-1 overflow-y-auto px-12 py-8 space-y-8">
+      {/* ── Scrollable content ── px-8 py-8 matches SessionComplete exactly */}
+      <div className="custom-scrollbar flex-1 overflow-y-auto px-8 py-8 space-y-8">
 
         {/* Captured sections — appear as the AI structures them */}
         {hasSections && (
@@ -139,6 +141,7 @@ export default function LiveDocument({
                 </div>
               </div>
             ))}
+
             {/* Divider between sections and transcript */}
             {hasTranscript && (
               <div className="border-t border-neutral-800 pt-6">
@@ -150,29 +153,15 @@ export default function LiveDocument({
           </div>
         )}
 
-        {/* Live transcript */}
+        {/* Live transcript — using prompt-kit-style Message component */}
         {hasTranscript ? (
           <div className="space-y-3">
             {transcript.map((entry) => (
-              <div
+              <Message
                 key={entry.id}
-                className={`flex gap-3 ${entry.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                {entry.role === 'ai' && (
-                  <div className="size-6 shrink-0 rounded-full bg-neutral-700 flex items-center justify-center mt-0.5">
-                    <div className="size-2 rounded-full bg-brand-accent" />
-                  </div>
-                )}
-                <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${
-                    entry.role === 'ai'
-                      ? 'bg-neutral-800 text-neutral-100'
-                      : 'bg-neutral-700 text-neutral-50'
-                  }`}
-                >
-                  <p className="font-inter text-[13.5px] leading-[20px]">{entry.text}</p>
-                </div>
-              </div>
+                role={entry.role === 'user' ? 'user' : 'assistant'}
+                content={entry.text}
+              />
             ))}
             <div ref={bottomRef} />
           </div>

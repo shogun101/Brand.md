@@ -1,5 +1,5 @@
 'use client';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircleIcon } from '@heroicons/react/24/solid';
 
 interface FloatingBarProps {
   agentName?: string;
@@ -21,7 +21,7 @@ export default function FloatingBar({
       <div className="absolute inset-x-0 bottom-8 z-20 flex justify-center">
         <div className="flex items-center gap-4 rounded-full border border-neutral-600 bg-[rgba(37,37,37,0.67)] py-2 pl-4 pr-2 shadow-[0px_10px_40px_0px_rgba(0,0,0,0.5)] backdrop-blur-[6px]">
           <div className="flex items-center gap-2">
-            <CheckCircle size={14} className="text-[#46a758]" />
+            <CheckCircleIcon className="size-[14px] text-[#46a758]" />
             <span className="font-inter text-[13.6px] font-semibold text-[rgba(237,237,237,0.72)]">
               Session Complete
             </span>
@@ -42,7 +42,7 @@ export default function FloatingBar({
   return (
     <div className="absolute inset-x-0 bottom-8 z-20 flex justify-center">
       <div className="flex items-center gap-4 rounded-full border border-neutral-600 bg-[rgba(37,37,37,0.67)] py-2 pl-4 pr-2 shadow-[0px_10px_40px_0px_rgba(0,0,0,0.5)] backdrop-blur-[6px]">
-        {/* Audio bars */}
+        {/* Static bars */}
         <div className="flex items-center gap-3">
           <div className="flex h-2 items-center gap-[3px]">
             {[8, 8, 8, 8].map((h, i) => (
