@@ -1,5 +1,6 @@
 'use client';
-import { PauseIcon, XMarkIcon } from '@heroicons/react/24/solid';
+import { PauseIcon, XMarkIcon, MicrophoneIcon } from '@heroicons/react/24/solid';
+import { MicrophoneIcon as MicOffIcon } from '@heroicons/react/24/outline';
 
 type MicState = 'READY' | 'LISTENING' | 'PROCESSING' | 'AI_SPEAKING' | 'ERROR';
 
@@ -7,6 +8,8 @@ interface MicIndicatorProps {
   micState: MicState;
   audioLevel?: number;   // 0–1 real-time mic amplitude
   micError?: string | null;
+  isMuted?: boolean;
+  onToggleMute?: () => void;
   onPause?: () => void;
   onEnd?: () => void;
 }
@@ -55,16 +58,23 @@ export default function MicIndicator({
   micState,
   audioLevel = 0,
   micError,
+  isMuted = false,
+  onToggleMute,
   onPause,
   onEnd,
 }: MicIndicatorProps) {
   const config = stateConfig[micState];
+
+  // When muted, override bar color to dim gray
+  const barColor = isMuted ? 'rgba(255,255,255,0.25)' : config.color;
+
   const textColor =
     config.color === 'rgba(255,255,255,0.3)' || config.color === 'rgba(255,255,255,0.16)'
       ? 'rgba(237,237,237,0.72)'
       : config.color;
 
-  const boosted = Math.min(1, audioLevel * 2.5);
+  // When muted, audio level shows flat (no movement)
+  const boosted = isMuted ? 0.15 : Math.min(1, audioLevel * 2.5);
 
   const label = micState === 'ERROR'
     ? (micError ?? 'Mic error')
@@ -87,7 +97,7 @@ export default function MicIndicator({
                     <div
                       key={i}
                       className="w-[3px] rounded-[2px] transition-all duration-75"
-                      style={{ height: `${h}px`, backgroundColor: config.color }}
+                      style={{ height: `${h}px`, backgroundColor: barColor }}
                     />
                   );
                 }
@@ -95,7 +105,7 @@ export default function MicIndicator({
                   <div
                     key={i}
                     className={`w-[3px] rounded-[2px] ${animClasses[i]}`}
-                    style={{ height: '8px', backgroundColor: config.color }}
+                    style={{ height: '8px', backgroundColor: barColor }}
                   />
                 );
               })}
@@ -133,6 +143,18 @@ export default function MicIndicator({
 
             {/* Action buttons */}
             <div className="flex items-center gap-1 py-1.5 pl-2 pr-2">
+              {onToggleMute && (
+                <button
+                  onClick={onToggleMute}
+                  title={isMuted ? 'Unmute mic' : 'Mute mic'}
+                  className={`flex size-8 items-center justify-center rounded-full transition-colors hover:bg-white/10 ${isMuted ? 'text-red-400' : 'text-white'}`}
+                >
+                  {isMuted
+                    ? <MicOffIcon className="w-5 h-5" />
+                    : <MicrophoneIcon className="w-5 h-5" />
+                  }
+                </button>
+              )}
               {onPause && (
                 <button
                   onClick={onPause}

@@ -17,6 +17,8 @@ interface HeroPanelProps {
   onNewSession?: () => void;
   onToggleAudio?: () => void;
   /** Passed through to MicIndicator when session is active */
+  isMuted?: boolean;
+  onToggleMute?: () => void;
   onPause?: () => void;
   onEnd?: () => void;
 }
@@ -32,6 +34,8 @@ export default function HeroPanel({
   onStartSession,
   onNewSession,
   onToggleAudio,
+  isMuted,
+  onToggleMute,
   onPause,
   onEnd,
 }: HeroPanelProps) {
@@ -95,6 +99,8 @@ export default function HeroPanel({
           micState={micState}
           micError={micError}
           audioLevel={audioLevel}
+          isMuted={isMuted}
+          onToggleMute={onToggleMute}
           onPause={onPause}
           onEnd={onEnd}
         />

@@ -34,6 +34,7 @@ const AGENT_AVATARS: Record<string, string> = {
 export default function HomePage() {
   const router = useRouter();
   const [isPaused, setIsPaused] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
   const conversationRef = useRef<ConversationHandle | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const sessionActiveRef = useRef(false);
@@ -354,6 +355,18 @@ export default function HomePage() {
     // ElevenLabs conv intentionally NOT disconnected — session stays alive
   }, [stopLevelMonitor, stopTimer, setMicState]);
 
+  // ── Toggle mute ───────────────────────────────────────────────────────────
+  const handleToggleMute = useCallback(() => {
+    setIsMuted(prev => {
+      const next = !prev;
+      // Mute/unmute the mic track if available via getUserMedia stream
+      if (levelStreamRef.current) {
+        levelStreamRef.current.getAudioTracks().forEach(t => { t.enabled = !next; });
+      }
+      return next;
+    });
+  }, []);
+
   // ── Resume session ────────────────────────────────────────────────────────
   const handleResumeSession = useCallback(() => {
     setIsPaused(false);
@@ -368,6 +381,7 @@ export default function HomePage() {
     stopTimer();
     stopLevelMonitor();
     setIsPaused(false);
+    setIsMuted(false);
     const conv = conversationRef.current;
     if (conv?.endSession) {
       await conv.endSession();
@@ -451,6 +465,8 @@ export default function HomePage() {
             onStartSession={handleStartSession}
             onNewSession={handleNewSession}
             onToggleAudio={toggleAudio}
+            isMuted={isMuted}
+            onToggleMute={handleToggleMute}
             onPause={handlePauseSession}
             onEnd={handleEndSession}
           />
