@@ -150,7 +150,25 @@ export default function Sidebar({ onStartSession, onAgentChange, onModulesChange
             </p>
           </div>
           {modulesSection}
-          {agentSection}
+
+          {/* Agent selector — mobile: grid fills width, overrides fixed card dimensions */}
+          <div className="flex flex-col gap-3">
+            <h2 className="font-inter text-[11.2px] font-semibold uppercase tracking-[0.56px] text-neutral-300">
+              Select Agent
+            </h2>
+            <div className="grid grid-cols-3 gap-2 [&_button]:w-full [&_button]:min-w-0">
+              {AGENTS.map((agent) => (
+                <AgentCard
+                  key={agent.id}
+                  name={agent.name}
+                  role={agent.role}
+                  image={agent.image}
+                  selected={selectedAgent === agent.id}
+                  onClick={() => handleAgentSelect(agent.id)}
+                />
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Sticky CTA — always visible, never scrolls away */}
