@@ -141,7 +141,7 @@ Build the complete brand kit now. Use only what was actually discussed. Be speci
 
     const response = await client.chat.completions.create({
       model: 'gpt-5.2',
-      max_tokens: 8192,
+      max_completion_tokens: 8192,
       response_format: { type: 'json_object' },
       messages: [
         { role: 'system', content: systemPrompt },
