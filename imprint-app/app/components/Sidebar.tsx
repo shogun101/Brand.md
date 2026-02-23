@@ -137,44 +137,45 @@ export default function Sidebar({ onStartSession, onAgentChange, onModulesChange
       </aside>
 
       {/* ── MOBILE (< md) ── Separate layout, same store + handlers ── */}
-      <div className="flex md:hidden h-[calc(100vh-56px)] flex-col bg-brand-surface overflow-hidden">
-        {/* Scrollable content */}
-        <div className="custom-scrollbar flex-1 overflow-y-auto px-6 pt-6 pb-4 flex flex-col gap-8">
-          {/* Hero text */}
-          <div className="flex flex-col gap-2">
-            <h1 className="font-awesome-serif text-[28px] font-normal leading-tight tracking-[0.56px] text-white">
-              Build Your Brand, Out Loud
-            </h1>
-            <p className="font-inter text-[13.5px] leading-[20px] text-neutral-300">
-              One conversation and you walk away with structured brand files your AI tools can actually use.
-            </p>
-          </div>
-          {modulesSection}
+      {/* Scrollable content — pb-24 reserves space above the fixed CTA */}
+      <div
+        className="md:hidden custom-scrollbar overflow-y-auto px-6 pt-6 pb-24 flex flex-col gap-8 bg-brand-surface"
+        style={{ height: 'calc(100vh - 56px)' }}
+      >
+        {/* Hero text */}
+        <div className="flex flex-col gap-2">
+          <h1 className="font-awesome-serif text-[28px] font-normal leading-tight tracking-[0.56px] text-white">
+            Build Your Brand, Out Loud
+          </h1>
+          <p className="font-inter text-[13.5px] leading-[20px] text-neutral-300">
+            One conversation and you walk away with structured brand files your AI tools can actually use.
+          </p>
+        </div>
+        {modulesSection}
 
-          {/* Agent selector — mobile: grid fills width, overrides fixed card dimensions */}
-          <div className="flex flex-col gap-3">
-            <h2 className="font-inter text-[11.2px] font-semibold uppercase tracking-[0.56px] text-neutral-300">
-              Select Agent
-            </h2>
-            <div className="grid grid-cols-3 gap-2 [&_button]:w-full [&_button]:min-w-0">
-              {AGENTS.map((agent) => (
-                <AgentCard
-                  key={agent.id}
-                  name={agent.name}
-                  role={agent.role}
-                  image={agent.image}
-                  selected={selectedAgent === agent.id}
-                  onClick={() => handleAgentSelect(agent.id)}
-                />
-              ))}
-            </div>
+        {/* Agent selector — grid fills width, overrides fixed card dimensions */}
+        <div className="flex flex-col gap-3">
+          <h2 className="font-inter text-[11.2px] font-semibold uppercase tracking-[0.56px] text-neutral-300">
+            Select Agent
+          </h2>
+          <div className="grid grid-cols-3 gap-2 [&_button]:w-full [&_button]:min-w-0">
+            {AGENTS.map((agent) => (
+              <AgentCard
+                key={agent.id}
+                name={agent.name}
+                role={agent.role}
+                image={agent.image}
+                selected={selectedAgent === agent.id}
+                onClick={() => handleAgentSelect(agent.id)}
+              />
+            ))}
           </div>
         </div>
+      </div>
 
-        {/* Sticky CTA — always visible, never scrolls away */}
-        <div className="shrink-0 px-6 pb-8 pt-4 bg-brand-surface border-t border-neutral-800">
-          {ctaButton}
-        </div>
+      {/* Fixed CTA — pinned to viewport bottom, immune to iOS Safari 100vh issues */}
+      <div className="md:hidden fixed bottom-0 inset-x-0 z-50 px-6 pt-6 pb-6 bg-brand-surface border-t border-neutral-800">
+        {ctaButton}
       </div>
     </>
   );
