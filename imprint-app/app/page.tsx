@@ -285,7 +285,7 @@ export default function HomePage() {
           // ── Closing phrase detection — end session immediately ──
           // Agent says "ready in the sidebar" → don't wait for WebSocket to close naturally.
           if (msg.source === 'ai' && cleanText.toLowerCase().includes('ready in the sidebar')) {
-            setTimeout(() => void handleEndSessionRef.current(), 1500);
+            setTimeout(() => void handleEndSessionRef.current(), 3500);
           }
         },
         // ── Plan B PRIMARY: parse sections from streaming tentative responses ──
