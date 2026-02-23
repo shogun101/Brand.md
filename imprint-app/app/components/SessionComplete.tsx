@@ -233,13 +233,19 @@ export default function SessionComplete({
       </div>
 
       {/* ── Footer ── */}
-      <div className="border-t border-neutral-800 px-8 py-6 shrink-0">
+      <div className="border-t border-neutral-800 px-8 py-6 shrink-0 flex gap-3">
         <button
           onClick={handleDownload}
-          className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-neutral-50 font-inter text-[14px] font-medium text-black shadow-[0px_2px_8px_0px_rgba(0,0,0,0.3)] transition-opacity hover:opacity-90"
+          className="flex flex-1 h-12 items-center justify-center gap-2 rounded-full bg-neutral-50 font-inter text-[14px] font-medium text-black shadow-[0px_2px_8px_0px_rgba(0,0,0,0.3)] transition-opacity hover:opacity-90"
         >
           <ArrowDownTrayIcon className="w-4 h-4 stroke-[2]" />
           Download Brand.md
+        </button>
+        <button
+          onClick={onNewSession}
+          className="md:hidden flex flex-1 h-12 items-center justify-center rounded-full border border-neutral-600 font-inter text-[14px] font-medium text-neutral-200 transition-opacity hover:opacity-90"
+        >
+          Start Another
         </button>
       </div>
     </div>
