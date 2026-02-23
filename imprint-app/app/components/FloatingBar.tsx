@@ -7,6 +7,8 @@ interface FloatingBarProps {
   onNewSession?: () => void;
   label?: string;
   isComplete?: boolean;
+  isSignedIn?: boolean;
+  onSignIn?: () => void;
 }
 
 export default function FloatingBar({
@@ -15,6 +17,8 @@ export default function FloatingBar({
   onNewSession,
   label,
   isComplete = false,
+  isSignedIn = false,
+  onSignIn,
 }: FloatingBarProps) {
   if (isComplete) {
     return (
@@ -57,13 +61,22 @@ export default function FloatingBar({
             {label || agentName}
           </span>
         </div>
-        {/* CTA */}
-        {onStartSession && (
+        {/* CTA — auth gated */}
+        {isSignedIn ? (
+          onStartSession && (
+            <button
+              onClick={onStartSession}
+              className="flex h-8 items-center justify-center rounded-full bg-neutral-50 px-3 font-awesome-serif text-xs text-black shadow-[0px_2px_4px_0px_rgba(0,0,0,0.2)] transition-opacity hover:opacity-90"
+            >
+              Start Session
+            </button>
+          )
+        ) : (
           <button
-            onClick={onStartSession}
+            onClick={onSignIn}
             className="flex h-8 items-center justify-center rounded-full bg-neutral-50 px-3 font-awesome-serif text-xs text-black shadow-[0px_2px_4px_0px_rgba(0,0,0,0.2)] transition-opacity hover:opacity-90"
           >
-            Start Session
+            Sign in to start
           </button>
         )}
       </div>

@@ -21,6 +21,8 @@ interface HeroPanelProps {
   onToggleMute?: () => void;
   onPause?: () => void;
   onEnd?: () => void;
+  isSignedIn?: boolean;
+  onSignIn?: () => void;
 }
 
 export default function HeroPanel({
@@ -38,6 +40,8 @@ export default function HeroPanel({
   onToggleMute,
   onPause,
   onEnd,
+  isSignedIn = false,
+  onSignIn,
 }: HeroPanelProps) {
   const haloColor =
     micState === 'LISTENING'
@@ -92,7 +96,12 @@ export default function HeroPanel({
 
       {/* UI overlays — z-20 */}
       {appState === 'idle' && (
-        <FloatingBar agentName={agentName} onStartSession={onStartSession} />
+        <FloatingBar
+          agentName={agentName}
+          onStartSession={onStartSession}
+          isSignedIn={isSignedIn}
+          onSignIn={onSignIn}
+        />
       )}
       {appState === 'active' && (
         <MicIndicator

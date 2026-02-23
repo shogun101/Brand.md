@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@11labs/client": "^0.2.0",
+    "@clerk/nextjs": "^6.38.1",
     "@heroicons/react": "^2.2.0",
     "@supabase/supabase-js": "^2.97.0",
     "agentation": "^2.2.1",

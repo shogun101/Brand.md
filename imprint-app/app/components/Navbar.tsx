@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import { UserButton, SignInButton, useAuth } from '@clerk/nextjs';
 
 interface NavbarProps {
   activeLink?: string;
@@ -8,6 +9,8 @@ interface NavbarProps {
 }
 
 export default function Navbar({ activeLink, onSessionsClick }: NavbarProps) {
+  const { isSignedIn } = useAuth();
+
   return (
     <nav className="absolute inset-x-0 top-0 z-50 flex h-[56px] items-center justify-between border-b border-neutral-800 bg-brand-dark px-6">
       {/* Logo — clicking navigates home */}
@@ -28,7 +31,15 @@ export default function Navbar({ activeLink, onSessionsClick }: NavbarProps) {
         >
           Sessions
         </button>
-        <div className="size-[28px] rounded-full border border-neutral-400 bg-neutral-600" />
+        {isSignedIn ? (
+          <UserButton afterSignOutUrl="/" />
+        ) : (
+          <SignInButton mode="modal">
+            <button className="flex size-8 items-center justify-center rounded-full border border-neutral-600 bg-[rgba(37,37,37,0.5)] text-neutral-400 text-xs font-inter hover:opacity-80 transition-opacity">
+              Log in
+            </button>
+          </SignInButton>
+        )}
       </div>
     </nav>
   );

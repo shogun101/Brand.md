@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth, useClerk } from '@clerk/nextjs';
 import { useSessionStore } from '@/lib/session-store';
 import { startConversation, parseSectionUpdates } from '@/lib/elevenlabs';
 import { strategistPrompt } from '@/lib/prompts/strategist';
@@ -33,6 +34,8 @@ const AGENT_AVATARS: Record<string, string> = {
 
 export default function HomePage() {
   const router = useRouter();
+  const { isSignedIn } = useAuth();
+  const { openSignIn } = useClerk();
   const [isPaused, setIsPaused] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const conversationRef = useRef<ConversationHandle | null>(null);
@@ -425,13 +428,29 @@ export default function HomePage() {
       if (data.kit) {
         console.log('[kit] Generated successfully:', Object.keys(data.kit));
         storeState.setKitData(data.kit);
+        // Auto-save session to Supabase if signed in
+        if (isSignedIn) {
+          fetch('/api/sessions/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              brandName: storeState.brandName,
+              module: storeState.selectedModules[0] || 'positioning',
+              agent: storeState.selectedAgent,
+              durationSeconds: storeState.elapsedSeconds,
+              transcript: storeState.transcript,
+              sections: storeState.sections,
+              kitData: data.kit,
+            }),
+          }).catch(console.error); // fire and forget
+        }
       }
     } catch (e) {
       console.error('[kit] Generation failed:', e);
     } finally {
       storeState.setGeneratingKit(false);
     }
-  }, [setState, setMicState, stopTimer, stopLevelMonitor]);
+  }, [setState, setMicState, stopTimer, stopLevelMonitor, isSignedIn]);
   // Keep the forward ref in sync so handleStartSession always calls the latest version
   handleEndSessionRef.current = handleEndSession;
 
@@ -471,6 +490,8 @@ export default function HomePage() {
             onToggleMute={handleToggleMute}
             onPause={handlePauseSession}
             onEnd={handleEndSession}
+            isSignedIn={isSignedIn ?? false}
+            onSignIn={() => openSignIn()}
           />
           <AvatarCanvas />
         </div>
@@ -482,6 +503,8 @@ export default function HomePage() {
               onStartSession={handleStartSession}
               onAgentChange={() => {}}
               onModulesChange={() => {}}
+              isSignedIn={isSignedIn ?? false}
+              onSignIn={() => openSignIn()}
             />
           )}
           {state === 'active' && (
