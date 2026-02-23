@@ -83,7 +83,7 @@ ${JSON.stringify({ sections: exampleJson }, null, 2)}`;
     const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
     const response = await client.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-4.1',
       max_tokens: 2048,
       temperature: 0.3,
       messages: [

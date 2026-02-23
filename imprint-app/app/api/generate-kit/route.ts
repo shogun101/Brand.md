@@ -67,15 +67,36 @@ export async function POST(req: Request) {
       ? transcript.map((t: { source: string; message: string }) => `[${t.source.toUpperCase()}]: ${t.message}`).join('\n\n')
       : '(no transcript available)';
 
-    const systemPrompt = `You are a brand strategist building a comprehensive brand kit from a voice session.
+    const systemPrompt = `You are a world-class brand strategist and AI systems architect.
 
 The user just completed a "${moduleKey}" session for brand "${brandName}" with agent "${agentKey}".
-You have their captured sections and full transcript.
+You have their captured sections and full session transcript.
 
-Your job: expand this into a complete, structured brand resource that an AI agent can use immediately.
-Use the user's ACTUAL words and phrases from the transcript — not generic filler.
-Write in clear, declarative statements — this output will be read directly by AI agents as context.
-Every section should be specific, actionable, and grounded in what was actually discussed.
+Your job: synthesize this into a complete Brand.md file. This file will be loaded as context into AI agents (Claude, GPT, Cursor, etc.) — it is NOT read by humans. Write for machines.
+
+WRITING STANDARD:
+- Every sentence must be a directive or fact an AI agent can act on immediately
+- No adjectives without specifics. "fast" → "ships in under 24h". "helpful" → "answers support queries in one message"
+- No filler phrases: no "we believe", "we strive", "our mission is", "we are committed to"
+- Write in third person about the brand — use the brand name or "they", never "you" or "we"
+- Dense and declarative — like a spec doc, not a brand manifesto
+- Use the user's ACTUAL words and phrases from the transcript wherever possible
+
+WHEN INPUT IS VAGUE OR THIN:
+- Extract the strongest signal from what was said and make it concrete
+- If the user said something general, find the most specific interpretation that fits
+- If a section was genuinely not discussed at all → write: "[Not covered — needs input]"
+- NEVER invent details that were not in the session. NEVER hallucinate.
+
+THE AGENT DIRECTIVES SECTION (most important):
+Write this as a strict numbered ruleset. These rules will be injected verbatim into AI agent system prompts. They must be:
+- Unambiguous — no room for interpretation
+- Testable — an AI can check if it is following the rule
+- Immediately usable — no context needed to understand them
+Format:
+RULE 1: [specific rule]
+RULE 2: [specific rule]
+...
 
 Generate sections for these specific IDs:
 ${sectionList}
@@ -95,7 +116,7 @@ Output structure:
         "content": "Full section content — 3-5 sentences, specific, declarative, written for AI agents to read and use directly"
       }
     ],
-    "agent_directives": "RULES:\\n- ...\\n- ...\\n(machine-readable rules an AI agent must follow)",
+    "agent_directives": "RULE 1: ...\\nRULE 2: ...\\n(machine-readable rules an AI agent must follow)",
     "retrieval_rules": {
       "website_copy": ["section-id-1", "section-id-2"],
       "social_media": ["section-id-1", "section-id-3"],
@@ -119,8 +140,8 @@ ${transcriptText}
 Build the complete brand kit now. Use only what was actually discussed. Be specific.`;
 
     const response = await client.chat.completions.create({
-      model: 'gpt-4o',
-      max_tokens: 4096,
+      model: 'gpt-5.2',
+      max_tokens: 8192,
       response_format: { type: 'json_object' },
       messages: [
         { role: 'system', content: systemPrompt },

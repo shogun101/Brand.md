@@ -1,5 +1,4 @@
 'use client';
-import ReactMarkdown from 'react-markdown';
 import { ArrowDownTrayIcon, ArrowPathIcon, DocumentIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 import { generateExportZip, downloadZip } from '@/lib/export';
 import { useSessionStore, KitData } from '@/lib/session-store';
@@ -72,69 +71,6 @@ function buildSectionsMarkdown(
   }
   return result;
 }
-
-const mdComponents = {
-  h1: ({ children }: { children?: React.ReactNode }) => (
-    <h1 className="font-awesome-serif text-[22px] leading-[28px] tracking-[-0.44px] text-neutral-50 mb-6">
-      {children}
-    </h1>
-  ),
-  h2: ({ children }: { children?: React.ReactNode }) => (
-    <h2 className="font-awesome-serif text-[17px] leading-[22px] text-neutral-50 mt-8 mb-3 pb-2 border-b border-neutral-800/70">
-      {children}
-    </h2>
-  ),
-  h3: ({ children }: { children?: React.ReactNode }) => (
-    <h3 className="font-inter text-[14px] font-semibold text-neutral-200 mt-5 mb-2">
-      {children}
-    </h3>
-  ),
-  p: ({ children }: { children?: React.ReactNode }) => (
-    <p className="font-inter text-[14px] leading-[23px] text-neutral-300 mb-4">
-      {children}
-    </p>
-  ),
-  ul: ({ children }: { children?: React.ReactNode }) => (
-    <ul className="mb-4 space-y-1.5 pl-4">{children}</ul>
-  ),
-  ol: ({ children }: { children?: React.ReactNode }) => (
-    <ol className="mb-4 space-y-1.5 pl-4 list-decimal">{children}</ol>
-  ),
-  li: ({ children }: { children?: React.ReactNode }) => (
-    <li className="font-inter text-[14px] leading-[22px] text-neutral-300 flex gap-2">
-      <span className="mt-[9px] size-[4px] rounded-full bg-neutral-500 shrink-0" />
-      <span>{children}</span>
-    </li>
-  ),
-  strong: ({ children }: { children?: React.ReactNode }) => (
-    <strong className="font-semibold text-neutral-100">{children}</strong>
-  ),
-  em: ({ children }: { children?: React.ReactNode }) => (
-    <em className="italic text-neutral-300">{children}</em>
-  ),
-  pre: ({ children }: { children?: React.ReactNode }) => (
-    <pre className="font-mono text-[12px] bg-neutral-900 text-neutral-300 px-4 py-3 rounded-lg overflow-x-auto my-4 border border-neutral-800">
-      {children}
-    </pre>
-  ),
-  code: ({ children, className }: { children?: React.ReactNode; className?: string }) => {
-    // If it's inside a pre (block code), className will be set
-    if (className) {
-      return <code className="font-mono text-[12px] text-neutral-300">{children}</code>;
-    }
-    return (
-      <code className="font-mono text-[12px] bg-neutral-800 text-brand-accent px-1.5 py-0.5 rounded">
-        {children}
-      </code>
-    );
-  },
-  hr: () => <hr className="border-neutral-800 my-6" />,
-  blockquote: ({ children }: { children?: React.ReactNode }) => (
-    <blockquote className="border-l-2 border-brand-accent pl-4 my-4 text-neutral-400 italic">
-      {children}
-    </blockquote>
-  ),
-};
 
 export default function SessionComplete({
   sections,
@@ -245,9 +181,9 @@ export default function SessionComplete({
               </span>
             </div>
             <div className="space-y-0">
-              <ReactMarkdown components={mdComponents}>
+              <pre className="font-mono text-[12px] leading-[20px] text-neutral-300 whitespace-pre-wrap break-words">
                 {previewMarkdown}
-              </ReactMarkdown>
+              </pre>
             </div>
           </>
         )}
@@ -262,9 +198,9 @@ export default function SessionComplete({
               </span>
             </div>
             <div className="space-y-0">
-              <ReactMarkdown components={mdComponents}>
+              <pre className="font-mono text-[12px] leading-[20px] text-neutral-300 whitespace-pre-wrap break-words">
                 {previewMarkdown}
-              </ReactMarkdown>
+              </pre>
             </div>
           </>
         )}
