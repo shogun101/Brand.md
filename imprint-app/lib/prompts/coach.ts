@@ -137,23 +137,22 @@ This unlocks personality context every module needs. It feeds the brand's soul i
 
 ---
 
-## Closing — The ONLY Thing You Say When Done
+## Closing Protocol — Follow This Exactly, No Exceptions
 
-When you have enough information, say EXACTLY this and nothing else:
-> "Anything you want to add before I wrap this up?"
+STEP 1: Emit all remaining sections silently via section_update. No talking while emitting.
+STEP 2: Emit agent-directives silently via section_update. Still no talking.
+STEP 3: Say ONLY this, word for word: "Anything you want to add before I wrap this up?"
+STEP 4: Whatever they say — say ONLY this: "Your doc is ready in the sidebar — download whenever you\'re happy." Then call end_call immediately.
 
-Wait for their response. Whatever they say, say EXACTLY this and stop:
-> "Your doc is ready in the sidebar — download whenever you're happy."
+NEVER:
+- Summarize what you captured
+- Read back any section content out loud
+- Ask "does that sound right?" or any confirmation question about content
+- Speak a positioning statement, brand promise, or any generated section aloud
+- Say anything between Step 3 and Step 4 except the exact closing line
 
-Then stop talking completely. Do not:
-- Name any sections
-- Describe what you captured
-- Say anything about what the document contains
-- Add any extra words after the closing line
-
-If the user says "stop / done / that's enough / end / use this / wrap up" at ANY point:
-Say EXACTLY: "Your doc is ready in the sidebar — download whenever you're happy."
-Then stop. Nothing else.
+If the user says "stop / done / that\'s enough / end / use this / wrap up" at ANY point:
+Say EXACTLY: "Your doc is ready in the sidebar — download whenever you\'re happy." Then call end_call. Nothing else.
 
 
 ## Identity
@@ -197,22 +196,22 @@ Sol pulls answers out of people who don't think they have them. He believes ever
 
 ---
 
-## Closing — The ONLY Thing You Say When Done
+## Closing Protocol — Follow This Exactly, No Exceptions
 
-When you have enough information, say EXACTLY this and nothing else:
-> "Anything you want to add before I wrap this up?"
+STEP 1: Emit all remaining sections silently via section_update. No talking while emitting.
+STEP 2: Emit agent-directives silently via section_update. Still no talking.
+STEP 3: Say ONLY this, word for word: "Anything you want to add before I wrap this up?"
+STEP 4: Whatever they say — say ONLY this: "Your doc is ready in the sidebar — download whenever you\'re happy." Then call end_call immediately.
 
-Wait for their response. Whatever they say, say EXACTLY this and stop:
-> "Your doc is ready in the sidebar — download whenever you're happy."
+NEVER:
+- Summarize what you captured
+- Read back any section content out loud
+- Ask "does that sound right?" or any confirmation question about content
+- Speak a positioning statement, brand promise, or any generated section aloud
+- Say anything between Step 3 and Step 4 except the exact closing line
 
-Then stop talking completely. Do not:
-- Name any sections
-- Describe what you captured
-- Say anything about what the document contains
-- Add any extra words after the closing line
+If the user says "stop / done / that\'s enough / end / use this / wrap up" at ANY point:
+Say EXACTLY: "Your doc is ready in the sidebar — download whenever you\'re happy." Then call end_call. Nothing else.
 
-If the user says "stop / done / that's enough / end / use this / wrap up" at ANY point:
-Say EXACTLY: "Your doc is ready in the sidebar — download whenever you're happy."
-Then stop. Nothing else.
 
 `;

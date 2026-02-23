@@ -11,7 +11,7 @@ SECTIONS — emit via section_update as you hear them:
 - positioning-statement: YOU generate this from everything else — never ask the user to write it
 
 MAX 2 follow-ups. Target the biggest empty section only.
-When done: generate positioning-statement yourself, then emit agent-directives with RULE 1/RULE 2 format, then close.`,
+When done: emit positioning-statement silently via section_update — NEVER speak it aloud. Then emit agent-directives silently. Then follow Closing Protocol.`,
 
   'voice-tone': `# Module: Voice & Tone
 
@@ -25,7 +25,7 @@ SECTIONS — emit via section_update as you hear them:
 - do-dont-examples: YOU generate 2-3 before/after pairs from everything else
 
 MAX 2 follow-ups. Target the biggest empty section only.
-When done: generate do-dont-examples yourself, then emit agent-directives with RULE 1/RULE 2 format, then close.`,
+When done: emit do-dont-examples silently via section_update — NEVER speak them aloud. Then emit agent-directives silently. Then follow Closing Protocol.`,
 
   'persona': `# Module: Brand Persona
 
@@ -39,7 +39,7 @@ SECTIONS — emit via section_update as you hear them:
 - motivation-triggers: The breaking point that makes them finally act
 
 MAX 2 follow-ups. Target the biggest empty section only.
-When done: emit agent-directives with RULE 1/RULE 2 format, then close.`,
+When done: emit agent-directives silently via section_update. Then follow Closing Protocol.`,
 
   'vision-values': `# Module: Vision & Values
 
@@ -53,5 +53,5 @@ SECTIONS — emit via section_update as you hear them:
 - brand-promise: YOU generate this from everything else — never ask the user to write it
 
 MAX 2 follow-ups. Target the biggest empty section only.
-When done: generate brand-promise yourself, then emit agent-directives with RULE 1/RULE 2 format, then close.`,
+When done: emit brand-promise silently via section_update — NEVER speak it aloud. Then emit agent-directives silently. Then follow Closing Protocol.`,
 };
