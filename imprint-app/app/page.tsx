@@ -228,6 +228,12 @@ export default function HomePage() {
   const handleStartSession = useCallback(async () => {
     setMicError(null);
 
+    // Show avatar immediately on tap — don't wait for mic permission
+    sessionActiveRef.current = true;
+    setState('active');
+    setMicState('READY');
+    startTimer();
+
     let micStream: MediaStream | null = null;
     try {
       micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
@@ -245,14 +251,11 @@ export default function HomePage() {
         setMicState('ERROR');
         setMicError('Could not access microphone');
       }
+      sessionActiveRef.current = false;
       setState('idle');
+      stopTimer();
       return;
     }
-
-    sessionActiveRef.current = true;
-    setState('active');
-    setMicState('READY');
-    startTimer();
 
     const prompt = AGENT_PROMPTS[selectedAgent] || strategistPrompt;
 
