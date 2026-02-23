@@ -470,7 +470,7 @@ export default function HomePage() {
       />
 
       <main
-        className="absolute inset-x-0 bottom-0 flex"
+        className="absolute inset-x-0 bottom-0 hidden md:flex"
         style={{ top: '56px' }}
       >
         {/* Left — Hero panel */}
@@ -529,6 +529,62 @@ export default function HomePage() {
           )}
         </div>
       </main>
+
+      {/* ── Mobile layout (< md) ── */}
+      <div
+        className="absolute inset-x-0 bottom-0 flex md:hidden"
+        style={{ top: '56px' }}
+      >
+        {/* Step 1: Configure — show Sidebar full-screen */}
+        {state === 'idle' && (
+          <div className="relative w-full h-full">
+            <Sidebar
+              onStartSession={handleStartSession}
+              onAgentChange={() => {}}
+              onModulesChange={() => {}}
+              isSignedIn={isSignedIn ?? false}
+              onSignIn={() => openSignIn()}
+            />
+          </div>
+        )}
+
+        {/* Step 2: Session live — show HeroPanel full-screen */}
+        {state === 'active' && (
+          <div className="relative w-full h-full">
+            <HeroPanel
+              agentName={agentDisplayName}
+              agentAvatar={AGENT_AVATARS[selectedAgent] ?? '/images/hero-figure.png'}
+              appState={state}
+              micState={micState}
+              micError={micError}
+              audioLevel={audioLevel}
+              audioEnabled={audioEnabled}
+              onStartSession={handleStartSession}
+              onNewSession={handleNewSession}
+              onToggleAudio={toggleAudio}
+              isMuted={isMuted}
+              onToggleMute={handleToggleMute}
+              onPause={handlePauseSession}
+              onEnd={handleEndSession}
+              isSignedIn={isSignedIn ?? false}
+              onSignIn={() => openSignIn()}
+            />
+            <AvatarCanvas />
+          </div>
+        )}
+
+        {/* Step 3: Complete — show SessionComplete full-screen */}
+        {state === 'complete' && (
+          <div className="w-full h-full">
+            <SessionComplete
+              sections={sections}
+              isGenerating={isGenerating}
+              isGeneratingKit={isGeneratingKit}
+              onNewSession={handleNewSession}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

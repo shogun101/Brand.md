@@ -53,7 +53,7 @@ export default function HeroPanel({
   const showComplete = appState === 'complete';
 
   return (
-    <div className="relative h-full overflow-hidden border-r border-neutral-800 bg-brand-panel">
+    <div className="relative h-full overflow-hidden md:border-r md:border-neutral-800 bg-brand-panel">
       {/* 1. Radial halo — z-1 */}
       <div
         className="pointer-events-none absolute inset-0 z-[1] transition-all duration-1000"
