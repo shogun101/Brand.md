@@ -1,5 +1,5 @@
 'use client';
-import { ArrowDownTrayIcon, ArrowPathIcon, DocumentIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
+import { ArrowDownTrayIcon, DocumentIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 import { generateExportZip, downloadZip } from '@/lib/export';
 import { useSessionStore, KitData } from '@/lib/session-store';
 
@@ -141,14 +141,6 @@ export default function SessionComplete({
           </p>
         </div>
 
-        {/* Download always visible */}
-        <button
-          onClick={handleDownload}
-          className="flex h-8 items-center gap-1.5 justify-center rounded-full bg-neutral-50 px-3 font-inter text-[12px] font-medium text-black shadow-[0px_2px_4px_0px_rgba(0,0,0,0.2)] transition-opacity hover:opacity-90 whitespace-nowrap shrink-0"
-        >
-          <ArrowDownTrayIcon className="w-3 h-3 stroke-[2.5]" />
-          Download
-        </button>
       </div>
 
       {/* ── Scrollable Body ── */}
@@ -243,11 +235,11 @@ export default function SessionComplete({
       {/* ── Footer ── */}
       <div className="border-t border-neutral-800 px-8 py-6 shrink-0">
         <button
-          onClick={onNewSession}
-          className="flex h-12 w-full items-center justify-center gap-2 rounded-full border border-neutral-600 bg-[rgba(37,37,37,0.8)] font-inter text-[14px] font-medium text-neutral-200 transition-opacity hover:opacity-80"
+          onClick={handleDownload}
+          className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-neutral-50 font-inter text-[14px] font-medium text-black shadow-[0px_2px_8px_0px_rgba(0,0,0,0.3)] transition-opacity hover:opacity-90"
         >
-          <ArrowPathIcon className="w-3.5 h-3.5 stroke-[2]" />
-          Start Another Session
+          <ArrowDownTrayIcon className="w-4 h-4 stroke-[2]" />
+          Download Brand.md
         </button>
       </div>
     </div>
