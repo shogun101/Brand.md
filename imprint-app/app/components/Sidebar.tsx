@@ -38,9 +38,11 @@ interface SidebarProps {
   onModulesChange?: (activeModule: string) => void;
   isSignedIn?: boolean;
   onSignIn?: () => void;
+  isStarting?: boolean;
+  micError?: string | null;
 }
 
-export default function Sidebar({ onStartSession, onAgentChange, onModulesChange, isSignedIn = false, onSignIn }: SidebarProps) {
+export default function Sidebar({ onStartSession, onAgentChange, onModulesChange, isSignedIn = false, onSignIn, isStarting = false, micError }: SidebarProps) {
   const { selectedAgent, setAgent, setSelectedModule } = useSessionStore();
   const [activeModule, setActiveModule] = useState<string>('positioning');
 
@@ -55,20 +57,28 @@ export default function Sidebar({ onStartSession, onAgentChange, onModulesChange
     onModulesChange?.(id);
   };
 
-  const ctaButton = isSignedIn ? (
-    <button
-      onClick={onStartSession}
-      className="flex h-12 w-full items-center justify-center rounded-[46px] border border-white bg-neutral-50 font-awesome-serif text-base text-black transition-opacity hover:opacity-90"
-    >
-      Start Session
-    </button>
-  ) : (
-    <button
-      onClick={onSignIn}
-      className="flex h-12 w-full items-center justify-center rounded-[46px] border border-white bg-neutral-50 font-awesome-serif text-base text-black transition-opacity hover:opacity-90"
-    >
-      Sign in to get started
-    </button>
+  const ctaButton = (
+    <div className="flex flex-col gap-2">
+      {isSignedIn ? (
+        <button
+          onClick={onStartSession}
+          disabled={isStarting}
+          className="flex h-12 w-full items-center justify-center rounded-[46px] border border-white bg-neutral-50 font-awesome-serif text-base text-black transition-opacity hover:opacity-90 disabled:opacity-60"
+        >
+          {isStarting ? 'Starting...' : 'Start Session'}
+        </button>
+      ) : (
+        <button
+          onClick={onSignIn}
+          className="flex h-12 w-full items-center justify-center rounded-[46px] border border-white bg-neutral-50 font-awesome-serif text-base text-black transition-opacity hover:opacity-90"
+        >
+          Sign in to get started
+        </button>
+      )}
+      {micError && (
+        <p className="text-center font-inter text-[12px] text-red-400">{micError}</p>
+      )}
+    </div>
   );
 
   const modulesSection = (

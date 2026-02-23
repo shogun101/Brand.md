@@ -38,6 +38,7 @@ export default function HomePage() {
   const { openSignIn } = useClerk();
   const [isPaused, setIsPaused] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
   const conversationRef = useRef<ConversationHandle | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const sessionActiveRef = useRef(false);
@@ -227,12 +228,7 @@ export default function HomePage() {
   // ── Start session ─────────────────────────────────────────────────────────
   const handleStartSession = useCallback(async () => {
     setMicError(null);
-
-    // Show avatar immediately on tap — don't wait for mic permission
-    sessionActiveRef.current = true;
-    setState('active');
-    setMicState('READY');
-    startTimer();
+    setIsStarting(true);
 
     let micStream: MediaStream | null = null;
     try {
@@ -242,20 +238,21 @@ export default function HomePage() {
     } catch (err: unknown) {
       const name = (err as { name?: string })?.name ?? '';
       if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
-        setMicState('ERROR');
         setMicError('Mic blocked — allow microphone access in browser settings');
       } else if (name === 'NotFoundError' || name === 'DevicesNotFoundError') {
-        setMicState('ERROR');
         setMicError('No microphone found — plug one in and try again');
       } else {
-        setMicState('ERROR');
         setMicError('Could not access microphone');
       }
-      sessionActiveRef.current = false;
-      setState('idle');
-      stopTimer();
+      setIsStarting(false);
       return;
     }
+
+    setIsStarting(false);
+    sessionActiveRef.current = true;
+    setState('active');
+    setMicState('READY');
+    startTimer();
 
     const prompt = AGENT_PROMPTS[selectedAgent] || strategistPrompt;
 
@@ -547,6 +544,8 @@ export default function HomePage() {
               onModulesChange={() => {}}
               isSignedIn={isSignedIn ?? false}
               onSignIn={() => openSignIn()}
+              isStarting={isStarting}
+              micError={micError}
             />
           </div>
         )}
