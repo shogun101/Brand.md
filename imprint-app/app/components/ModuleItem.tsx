@@ -10,7 +10,7 @@ interface ModuleItemProps {
 
 export default function ModuleItem({ label, duration, description, checked, onChange }: ModuleItemProps) {
   return (
-    <label className="flex w-full cursor-pointer items-center justify-between rounded-md border border-transparent px-[13px] py-[11px] transition-colors hover:bg-white/[0.02]">
+    <label className="flex w-full cursor-pointer items-center justify-between rounded-md border border-transparent -ml-[13px] px-[13px] py-[11px] transition-colors hover:bg-white/[0.02]">
       <div className="flex items-center gap-3">
         <div className="relative shrink-0">
           <input
