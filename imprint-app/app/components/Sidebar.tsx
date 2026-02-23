@@ -139,8 +139,8 @@ export default function Sidebar({ onStartSession, onAgentChange, onModulesChange
       {/* ── MOBILE (< md) ── Separate layout, same store + handlers ── */}
       {/* Scrollable content — pb-24 reserves space above the fixed CTA */}
       <div
-        className="md:hidden custom-scrollbar overflow-y-auto px-6 pt-6 pb-24 flex flex-col gap-8 bg-brand-surface"
-        style={{ height: 'calc(100vh - 56px)' }}
+        className="md:hidden custom-scrollbar overflow-y-auto px-6 pt-6 pb-6 flex flex-col gap-8 bg-brand-surface"
+        style={{ height: 'calc(100vh - 152px)' }}
       >
         {/* Hero text */}
         <div className="flex flex-col gap-2">
