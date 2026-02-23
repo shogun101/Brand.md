@@ -41,11 +41,8 @@ export async function startConversation(config: ElevenLabsConfig) {
   }
 
   // Build override: agent base prompt + module question flow
-  const basePrompt = AGENT_BASE_PROMPTS[agent] || strategistPrompt;
   const modulePrompt = config.moduleKey ? MODULE_PROMPTS[config.moduleKey] : undefined;
-  const fullPrompt = modulePrompt
-    ? `${basePrompt}\n\n${modulePrompt}`
-    : basePrompt;
+  const fullPrompt = modulePrompt ?? (AGENT_BASE_PROMPTS[agent] || strategistPrompt);
 
   const moduleKey = config.moduleKey || 'positioning';
   const firstMessage = MODULE_FIRST_MESSAGES[moduleKey] ?? MODULE_FIRST_MESSAGES['positioning'];
