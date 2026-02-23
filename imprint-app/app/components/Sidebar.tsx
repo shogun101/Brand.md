@@ -42,7 +42,6 @@ interface SidebarProps {
 
 export default function Sidebar({ onStartSession, onAgentChange, onModulesChange, isSignedIn = false, onSignIn }: SidebarProps) {
   const { selectedAgent, setAgent, setSelectedModule } = useSessionStore();
-  // Single-select: only one module active at a time; default = first
   const [activeModule, setActiveModule] = useState<string>('positioning');
 
   const handleAgentSelect = (id: string) => {
@@ -72,12 +71,50 @@ export default function Sidebar({ onStartSession, onAgentChange, onModulesChange
     </button>
   );
 
+  const modulesSection = (
+    <div className="flex flex-col gap-3">
+      <h2 className="font-inter text-[11.2px] font-semibold uppercase tracking-[0.56px] text-neutral-300">
+        Modules
+      </h2>
+      <div className="flex flex-col gap-1">
+        {DEFAULT_MODULES.map((mod) => (
+          <ModuleItem
+            key={mod.id}
+            label={mod.label}
+            duration={mod.duration}
+            description={mod.description}
+            checked={activeModule === mod.id}
+            onChange={() => handleModuleSelect(mod.id)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+
+  const agentSection = (
+    <div className="flex flex-col gap-3">
+      <h2 className="font-inter text-[11.2px] font-semibold uppercase tracking-[0.56px] text-neutral-300">
+        Select Agent
+      </h2>
+      <div className="flex gap-3">
+        {AGENTS.map((agent) => (
+          <AgentCard
+            key={agent.id}
+            name={agent.name}
+            role={agent.role}
+            image={agent.image}
+            selected={selectedAgent === agent.id}
+            onClick={() => handleAgentSelect(agent.id)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+
   return (
-    <aside className="flex h-full flex-col bg-brand-surface overflow-hidden md:custom-scrollbar md:overflow-y-auto md:justify-between md:gap-12 md:p-8">
-
-      {/* Scrollable content — on mobile: flex-1 scroll container. On desktop: display:contents (transparent to parent flex, preserves justify-between) */}
-      <div className="custom-scrollbar flex-1 overflow-y-auto flex flex-col gap-12 p-8 pb-4 md:contents">
-
+    <>
+      {/* ── DESKTOP (md+) ── Exactly as originally built, zero changes ── */}
+      <aside className="custom-scrollbar hidden md:flex h-full flex-col justify-between gap-12 overflow-y-auto bg-brand-surface p-8">
         {/* TOP GROUP */}
         <div className="flex flex-col gap-12">
           <div className="flex flex-col gap-[10px]">
@@ -89,59 +126,38 @@ export default function Sidebar({ onStartSession, onAgentChange, onModulesChange
               actually use.
             </p>
           </div>
-
-          {/* Modules — radio/single-select */}
-          <div className="flex flex-col gap-3">
-            <h2 className="font-inter text-[11.2px] font-semibold uppercase tracking-[0.56px] text-neutral-300">
-              Modules
-            </h2>
-            <div className="flex flex-col gap-1">
-              {DEFAULT_MODULES.map((mod) => (
-                <ModuleItem
-                  key={mod.id}
-                  label={mod.label}
-                  duration={mod.duration}
-                  description={mod.description}
-                  checked={activeModule === mod.id}
-                  onChange={() => handleModuleSelect(mod.id)}
-                />
-              ))}
-            </div>
-          </div>
+          {modulesSection}
         </div>
 
         {/* BOTTOM GROUP */}
         <div className="flex flex-col gap-12">
-          {/* Agent selector */}
-          <div className="flex flex-col gap-3">
-            <h2 className="font-inter text-[11.2px] font-semibold uppercase tracking-[0.56px] text-neutral-300">
-              Select Agent
-            </h2>
-            <div className="flex gap-3">
-              {AGENTS.map((agent) => (
-                <AgentCard
-                  key={agent.id}
-                  name={agent.name}
-                  role={agent.role}
-                  image={agent.image}
-                  selected={selectedAgent === agent.id}
-                  onClick={() => handleAgentSelect(agent.id)}
-                />
-              ))}
-            </div>
-          </div>
+          {agentSection}
+          {ctaButton}
+        </div>
+      </aside>
 
-          {/* Desktop-only CTA (inside scroll area, pushed to bottom by justify-between) */}
-          <div className="hidden md:block">
-            {ctaButton}
+      {/* ── MOBILE (< md) ── Separate layout, same store + handlers ── */}
+      <div className="flex md:hidden h-full flex-col bg-brand-surface overflow-hidden">
+        {/* Scrollable content */}
+        <div className="custom-scrollbar flex-1 overflow-y-auto px-6 pt-6 pb-4 flex flex-col gap-8">
+          {/* Hero text */}
+          <div className="flex flex-col gap-2">
+            <h1 className="font-awesome-serif text-[28px] font-normal leading-tight tracking-[0.56px] text-white">
+              Build Your Brand, Out Loud
+            </h1>
+            <p className="font-inter text-[13.5px] leading-[20px] text-neutral-300">
+              One conversation and you walk away with structured brand files your AI tools can actually use.
+            </p>
           </div>
+          {modulesSection}
+          {agentSection}
+        </div>
+
+        {/* Sticky CTA — always visible, never scrolls away */}
+        <div className="shrink-0 px-6 pb-8 pt-4 bg-brand-surface border-t border-neutral-800">
+          {ctaButton}
         </div>
       </div>
-
-      {/* Mobile-only sticky CTA — always visible at bottom */}
-      <div className="md:hidden shrink-0 px-8 pb-8 pt-4 bg-brand-surface border-t border-neutral-800">
-        {ctaButton}
-      </div>
-    </aside>
+    </>
   );
 }
