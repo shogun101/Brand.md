@@ -55,7 +55,6 @@ export async function startConversation(config: ElevenLabsConfig) {
     overrides: {
       agent: {
         prompt: { prompt: fullPrompt },
-        firstMessage: firstMessage,
       },
     },
     onMessage: config.onMessage,

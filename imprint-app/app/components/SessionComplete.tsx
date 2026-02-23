@@ -181,7 +181,7 @@ export default function SessionComplete({
               </span>
             </div>
             <div className="space-y-0">
-              <pre className="font-mono text-[12px] leading-[20px] text-neutral-300 whitespace-pre-wrap break-words">
+              <pre className="font-inter text-[14.4px] leading-[150%] font-normal whitespace-pre-wrap break-words" style={{ color: "rgba(237, 237, 237, 0.88)" }}>
                 {previewMarkdown}
               </pre>
             </div>
@@ -198,7 +198,7 @@ export default function SessionComplete({
               </span>
             </div>
             <div className="space-y-0">
-              <pre className="font-mono text-[12px] leading-[20px] text-neutral-300 whitespace-pre-wrap break-words">
+              <pre className="font-inter text-[14.4px] leading-[150%] font-normal whitespace-pre-wrap break-words" style={{ color: "rgba(237, 237, 237, 0.88)" }}>
                 {previewMarkdown}
               </pre>
             </div>
