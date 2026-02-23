@@ -137,7 +137,7 @@ export default function Sidebar({ onStartSession, onAgentChange, onModulesChange
       </aside>
 
       {/* ── MOBILE (< md) ── Separate layout, same store + handlers ── */}
-      <div className="flex md:hidden h-full flex-col bg-brand-surface overflow-hidden">
+      <div className="flex md:hidden absolute inset-0 flex-col bg-brand-surface overflow-hidden">
         {/* Scrollable content */}
         <div className="custom-scrollbar flex-1 overflow-y-auto px-6 pt-6 pb-4 flex flex-col gap-8">
           {/* Hero text */}
