@@ -535,12 +535,12 @@ export default function HomePage() {
 
       {/* ── Mobile layout (< md) ── */}
       <div
-        className="absolute inset-x-0 bottom-0 flex md:hidden"
+        className="absolute inset-x-0 bottom-0 flex flex-col md:hidden"
         style={{ top: '56px' }}
       >
         {/* Step 1: Configure — show Sidebar full-screen */}
         {state === 'idle' && (
-          <div className="relative w-full h-full">
+          <div className="flex-1 min-h-0 relative w-full">
             <Sidebar
               onStartSession={handleStartSession}
               onAgentChange={() => {}}
@@ -553,7 +553,7 @@ export default function HomePage() {
 
         {/* Step 2: Session live — show HeroPanel full-screen */}
         {state === 'active' && (
-          <div className="relative w-full h-full">
+          <div className="flex-1 min-h-0 relative w-full">
             <HeroPanel
               agentName={agentDisplayName}
               agentAvatar={AGENT_AVATARS[selectedAgent] ?? '/images/hero-figure.png'}
@@ -578,7 +578,7 @@ export default function HomePage() {
 
         {/* Step 3: Complete — show SessionComplete full-screen */}
         {state === 'complete' && (
-          <div className="w-full h-full">
+          <div className="flex-1 min-h-0 w-full">
             <SessionComplete
               sections={sections}
               isGenerating={isGenerating}
