@@ -137,7 +137,7 @@ export default function Sidebar({ onStartSession, onAgentChange, onModulesChange
       </aside>
 
       {/* ── MOBILE (< md) ── flex-col fills parent, no fixed positioning ── */}
-      <div className="md:hidden h-full flex flex-col overflow-hidden bg-brand-surface">
+      <div className="md:hidden flex flex-col overflow-hidden bg-brand-surface" style={{ height: 'calc(100dvh - 56px)' }}>
 
         {/* Scrollable content — flex-1 + min-h-0 enables overflow-y-auto */}
         <div className="custom-scrollbar flex-1 min-h-0 overflow-y-auto px-6 pt-6 pb-4 flex flex-col gap-8">
