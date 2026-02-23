@@ -553,7 +553,7 @@ export default function HomePage() {
 
         {/* Step 2: Session live — show HeroPanel full-screen */}
         {state === 'active' && (
-          <div className="flex-1 min-h-0 relative w-full">
+          <div className="relative w-full" style={{ height: 'calc(100dvh - 56px)' }}>
             <HeroPanel
               agentName={agentDisplayName}
               agentAvatar={AGENT_AVATARS[selectedAgent] ?? '/images/hero-figure.png'}
@@ -578,7 +578,7 @@ export default function HomePage() {
 
         {/* Step 3: Complete — show SessionComplete full-screen */}
         {state === 'complete' && (
-          <div className="flex-1 min-h-0 w-full">
+          <div className="w-full" style={{ height: 'calc(100dvh - 56px)' }}>
             <SessionComplete
               sections={sections}
               isGenerating={isGenerating}
