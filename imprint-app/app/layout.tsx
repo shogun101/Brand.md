@@ -5,8 +5,32 @@ import { ClerkProvider } from '@clerk/nextjs';
 import { dark } from '@clerk/themes';
 
 export const metadata: Metadata = {
-  title: 'Imprint — Build Your Brand, Out Loud',
-  description: 'Voice-based brand strategy tool. Have a conversation and walk away with structured brand files.',
+  title: 'BrandSprint',
+  description: 'Have one conversation and walk away with a complete brand kit your AI tools can actually use.',
+  icons: {
+    icon: '/icon.svg',
+  },
+  openGraph: {
+    title: 'BrandSprint',
+    description: 'Have one conversation and walk away with a complete brand kit your AI tools can actually use.',
+    url: 'https://brandsprint.app',
+    siteName: 'BrandSprint',
+    images: [
+      {
+        url: 'https://brandsprint.app/og-image.png',
+        width: 4072,
+        height: 2160,
+        alt: 'BrandSprint',
+      },
+    ],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'BrandSprint',
+    description: 'Have one conversation and walk away with a complete brand kit your AI tools can actually use.',
+    images: ['https://brandsprint.app/og-image.png'],
+  },
 };
 
 export default function RootLayout({
