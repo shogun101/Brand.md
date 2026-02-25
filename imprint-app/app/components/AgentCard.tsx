@@ -1,11 +1,14 @@
 'use client';
 
+import LockIcon from './icons/LockIcon';
+
 interface AgentCardProps {
   name: string;
   role: string;
   image: string;
   overlay?: string | null;
   selected?: boolean;
+  locked?: boolean;
   onClick?: () => void;
 }
 
@@ -15,25 +18,33 @@ export default function AgentCard({
   image,
   overlay,
   selected = false,
+  locked = false,
   onClick,
 }: AgentCardProps) {
   return (
     <button
-      onClick={onClick}
+      onClick={locked ? undefined : onClick}
       className={`relative h-[137px] w-[120px] shrink-0 overflow-hidden rounded-3xl border transition-all ${
-        selected
-          ? 'border-white/30 shadow-[0_0_20px_rgba(255,255,255,0.08)]'
-          : 'border-neutral-800 hover:border-neutral-600'
+        locked
+          ? 'cursor-default border-neutral-800'
+          : selected
+            ? 'border-white/30 shadow-[0_0_20px_rgba(255,255,255,0.08)]'
+            : 'border-neutral-800 hover:border-neutral-600'
       }`}
     >
+      {/* Background fill */}
       <div className="absolute inset-0 bg-brand-surface" />
+
+      {/* Agent image */}
       <img
         src={image}
         alt=""
         className="absolute inset-0 size-full rounded-3xl object-cover"
         aria-hidden="true"
       />
-      {overlay && (
+
+      {/* Overlay image (selected glow) */}
+      {overlay && !locked && (
         <img
           src={overlay}
           alt=""
@@ -41,17 +52,12 @@ export default function AgentCard({
           aria-hidden="true"
         />
       )}
-      <div
-        className={`absolute inset-0 rounded-3xl bg-gradient-to-b backdrop-blur-[1px] ${
-          selected
-            ? 'from-transparent to-[rgba(0,0,0,0.7)] border border-white/20'
-            : 'from-transparent to-black border border-black'
-        }`}
-      />
-      <div className="absolute bottom-[16px] left-[11px] flex w-[96px] flex-col items-start gap-[6px]">
+
+      {/* Text labels — placed BEFORE gradient so they go behind blur when locked */}
+      <div className="absolute bottom-[16px] left-[11px] z-[1] flex w-[96px] flex-col items-start gap-[6px]">
         <span
           className={`w-full font-inter text-[13.6px] font-semibold ${
-            selected ? 'text-neutral-50' : 'text-[rgba(237,237,237,0.72)]'
+            selected && !locked ? 'text-neutral-50' : 'text-[rgba(237,237,237,0.72)]'
           }`}
         >
           {name}
@@ -60,6 +66,24 @@ export default function AgentCard({
           {role}
         </span>
       </div>
+
+      {/* Gradient overlay — blurs text underneath when locked */}
+      <div
+        className={`absolute inset-0 z-[2] rounded-3xl bg-gradient-to-b ${
+          locked
+            ? 'from-black/30 to-black/80 backdrop-blur-[2px]'
+            : selected
+              ? 'from-transparent to-[rgba(0,0,0,0.7)]'
+              : 'from-transparent to-black'
+        }`}
+      />
+
+      {/* Lock icon — on top of everything */}
+      {locked && (
+        <div className="absolute inset-0 z-[3] flex items-center justify-center">
+          <LockIcon size={18} color="#EDEDED" />
+        </div>
+      )}
     </button>
   );
 }

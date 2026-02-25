@@ -3,6 +3,7 @@ import { useEffect, useRef, useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth, useClerk } from '@clerk/nextjs';
 import { useSessionStore } from '@/lib/session-store';
+import { useCredits } from '@/lib/use-credits';
 import { startConversation, parseSectionUpdates } from '@/lib/elevenlabs';
 import { strategistPrompt } from '@/lib/prompts/strategist';
 import { creativePrompt } from '@/lib/prompts/creative';
@@ -36,6 +37,7 @@ export default function HomePage() {
   const router = useRouter();
   const { isSignedIn } = useAuth();
   const { openSignIn } = useClerk();
+  const { consumeCredit, addCredits, hydrate } = useCredits();
   const [isPaused, setIsPaused] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
@@ -140,6 +142,31 @@ export default function HomePage() {
       stopLevelMonitor();
     };
   }, [stopTimer, stopLevelMonitor]);
+
+  // ── Hydrate credits from Supabase when signed in ──────────────────────────
+  useEffect(() => {
+    if (!isSignedIn) return;
+    fetch('/api/credits')
+      .then(r => r.json())
+      .then((data: { credits?: number; maxCredits?: number; isFreeTrial?: boolean }) => {
+        if (data.credits !== undefined) {
+          hydrate({ credits: data.credits, maxCredits: data.maxCredits ?? 1, isFreeTrial: data.isFreeTrial ?? true });
+        }
+      })
+      .catch(() => {});
+  }, [isSignedIn, hydrate]);
+
+  // ── Handle ?credits_added= query param after purchase ────────────────────
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const added = params.get('credits_added');
+    if (added) {
+      addCredits(Number(added));
+      const url = new URL(window.location.href);
+      url.searchParams.delete('credits_added');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, [addCredits]);
 
   // ── Browser SpeechRecognition fallback ────────────────────────────────────
   const useBrowserFallback = useCallback(
@@ -408,6 +435,7 @@ export default function HomePage() {
     // immediately in loading state, then fill in the kit when ready.
     const storeState = useSessionStore.getState();
     setState('complete');
+    consumeCredit();
     storeState.setGeneratingKit(true);
     try {
       const res = await fetch('/api/generate-kit', {

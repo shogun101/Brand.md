@@ -3,6 +3,7 @@ import { useState } from 'react';
 import AgentCard from './AgentCard';
 import ModuleItem from './ModuleItem';
 import { useSessionStore } from '@/lib/session-store';
+import { useCredits } from '@/lib/use-credits';
 
 const AGENTS = [
   {
@@ -26,11 +27,13 @@ const AGENTS = [
 ];
 
 const DEFAULT_MODULES = [
-  { id: 'positioning', label: 'Brand Positioning', duration: '5 min', description: 'For your website, pitch decks & investor intros' },
-  { id: 'voice-tone', label: 'Voice & Tone', duration: '5 min', description: 'Train any AI to write in your exact brand voice' },
-  { id: 'persona', label: 'Brand Persona', duration: '5 min', description: 'For ads, landing pages & product decisions' },
-  { id: 'vision-values', label: 'Vision & Values', duration: '5 min', description: 'For hiring pages, culture decks & fundraising' },
+  { id: 'positioning', label: 'Brand Positioning', duration: '5 min', description: 'For your website, pitch decks & investor intros', freeAccess: true },
+  { id: 'voice-tone', label: 'Voice & Tone', duration: '5 min', description: 'Train any AI to write in your exact brand voice', freeAccess: false },
+  { id: 'persona', label: 'Brand Persona', duration: '5 min', description: 'For ads, landing pages & product decisions', freeAccess: false },
+  { id: 'vision-values', label: 'Vision & Values', duration: '5 min', description: 'For hiring pages, culture decks & fundraising', freeAccess: false },
 ];
+
+const FREE_AGENT_ID = 'strategist';
 
 interface SidebarProps {
   onStartSession?: () => void;
@@ -44,6 +47,7 @@ interface SidebarProps {
 
 export default function Sidebar({ onStartSession, onAgentChange, onModulesChange, isSignedIn = false, onSignIn, isStarting = false, micError }: SidebarProps) {
   const { selectedAgent, setAgent, setSelectedModule } = useSessionStore();
+  const { isFreeTrial } = useCredits();
   const [activeModule, setActiveModule] = useState<string>('positioning');
 
   const handleAgentSelect = (id: string) => {
@@ -94,6 +98,7 @@ export default function Sidebar({ onStartSession, onAgentChange, onModulesChange
             duration={mod.duration}
             description={mod.description}
             checked={activeModule === mod.id}
+            locked={isFreeTrial && !mod.freeAccess}
             onChange={() => handleModuleSelect(mod.id)}
           />
         ))}
@@ -114,6 +119,7 @@ export default function Sidebar({ onStartSession, onAgentChange, onModulesChange
             role={agent.role}
             image={agent.image}
             selected={selectedAgent === agent.id}
+            locked={isFreeTrial && agent.id !== FREE_AGENT_ID}
             onClick={() => handleAgentSelect(agent.id)}
           />
         ))}
@@ -175,6 +181,7 @@ export default function Sidebar({ onStartSession, onAgentChange, onModulesChange
                   role={agent.role}
                   image={agent.image}
                   selected={selectedAgent === agent.id}
+                  locked={isFreeTrial && agent.id !== FREE_AGENT_ID}
                   onClick={() => handleAgentSelect(agent.id)}
                 />
               ))}
