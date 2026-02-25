@@ -50,7 +50,7 @@ export default function Navbar({ activeLink, onSessionsClick }: NavbarProps) {
         </button>
         {isSignedIn ? (
           <>
-            <div className="relative">
+            <div className="relative hidden md:block">
               <SessionsPill
                 credits={credits}
                 maxCredits={maxCredits}
