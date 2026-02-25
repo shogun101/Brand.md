@@ -1,48 +1,42 @@
+import { auth, currentUser } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import DodoPayments from 'dodopayments';
 
-/**
- * POST /api/checkout
- *
- * Creates a checkout session for the Brand Kit ($29).
- * Returns { checkout_url } which the client redirects to.
- *
- * TODO: Wire up to Dodo Payments (or Stripe) in production.
- * For now, returns a placeholder URL.
- *
- * Expected production flow:
- *  1. Authenticate user (Clerk/Supabase)
- *  2. Create Dodo Payments checkout session with:
- *     - product: Brand Kit ($29)
- *     - success_url: /api/checkout/success?session_id={id}
- *     - cancel_url: / (back to app)
- *  3. Return the checkout URL
- */
+const PRODUCT_ID = 'pdt_0NZFoV3kqgsjODi1gjf4G';
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://imprint-app-shogun.vercel.app';
+
 export async function POST() {
-  try {
-    // --- Production implementation ---
-    // const session = await dodoPayments.checkout.create({
-    //   amount: 2900,
-    //   currency: 'usd',
-    //   product_name: 'Brand Kit',
-    //   success_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-    //   cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}`,
-    //   metadata: {
-    //     user_id: userId,
-    //     credits: 5,
-    //   },
-    // });
-    // return NextResponse.json({ checkout_url: session.url });
+  const { userId } = await auth();
+  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    // --- Stub for development ---
-    console.log('[Checkout] Brand Kit checkout initiated');
-    return NextResponse.json({
-      checkout_url: '/api/checkout/success?dev=true',
+  const user = await currentUser();
+  const email = user?.emailAddresses?.[0]?.emailAddress ?? '';
+  const name = user?.fullName ?? '';
+
+  const dodo = new DodoPayments({
+    bearerToken: process.env.DODO_PAYMENTS_API_KEY!,
+    environment: (process.env.DODO_PAYMENTS_ENVIRONMENT ?? 'live_mode') as 'live_mode' | 'test_mode',
+  });
+
+  try {
+    const payment = await dodo.payments.create({
+      billing: {
+        city: 'N/A',
+        country: 'US',
+        state: 'N/A',
+        street: 'N/A',
+        zipcode: '00000',
+      },
+      customer: { email, name },
+      metadata: { userId },
+      payment_link: true,
+      product_cart: [{ product_id: PRODUCT_ID, quantity: 1 }],
+      return_url: `${APP_URL}/api/checkout/success`,
     });
-  } catch (error) {
-    console.error('[Checkout] Error:', error);
-    return NextResponse.json(
-      { error: 'Failed to create checkout session' },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ checkout_url: payment.payment_link });
+  } catch (err) {
+    console.error('[Checkout] Dodo Payments error:', err);
+    return NextResponse.json({ error: 'Failed to create checkout session' }, { status: 500 });
   }
 }
