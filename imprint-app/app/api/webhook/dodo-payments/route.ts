@@ -1,30 +1,37 @@
 import { NextResponse } from 'next/server';
+import { Webhook } from 'standardwebhooks';
 import { createServiceClient } from '@/lib/supabase';
 
-/**
- * POST /api/webhook/dodo-payments
- * Handles Dodo Payments webhook events.
- * TODO: Add signature verification with DODO_PAYMENTS_WEBHOOK_KEY once set.
- */
 export async function POST(request: Request) {
-  try {
-    // TODO: verify webhook signature
-    // const webhookKey = process.env.DODO_PAYMENTS_WEBHOOK_KEY;
-    // verify(request, webhookKey) ...
+  const webhookKey = process.env.DODO_PAYMENTS_WEBHOOK_KEY;
+  if (!webhookKey) {
+    console.error('[Webhook] DODO_PAYMENTS_WEBHOOK_KEY not set');
+    return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 });
+  }
 
-    const payload = await request.json() as {
+  const body = await request.text();
+  const headers = Object.fromEntries(request.headers.entries());
+
+  // Verify signature
+  try {
+    const wh = new Webhook(webhookKey);
+    wh.verify(body, headers);
+  } catch (err) {
+    console.error('[Webhook] Signature verification failed:', err);
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+  }
+
+  try {
+    const payload = JSON.parse(body) as {
       type?: string;
-      data?: {
-        metadata?: Record<string, string>;
-        status?: string;
-      };
+      data?: { metadata?: Record<string, string> };
     };
 
     if (payload.type === 'payment.succeeded') {
       const userId = payload.data?.metadata?.userId;
 
       if (!userId) {
-        console.error('[Webhook] No userId in payment metadata');
+        console.error('[Webhook] No userId in metadata');
         return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
       }
 
@@ -41,12 +48,12 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'DB error' }, { status: 500 });
       }
 
-      console.log(`[Webhook] Added 5 credits for user ${userId}`);
+      console.log(`[Webhook] ✅ Added 5 credits for user ${userId}`);
     }
 
     return NextResponse.json({ received: true });
   } catch (err) {
-    console.error('[Webhook] Error:', err);
-    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+    console.error('[Webhook] Parse error:', err);
+    return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
   }
 }
