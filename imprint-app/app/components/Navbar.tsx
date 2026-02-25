@@ -32,6 +32,14 @@ export default function Navbar({ activeLink, onSessionsClick }: NavbarProps) {
 
       {/* Right links + avatar */}
       <div className="flex items-center gap-5">
+        <Link
+          href="/"
+          className={`font-inter text-[13.6px] font-medium transition-colors ${
+            activeLink === 'home' ? 'text-neutral-50' : 'text-neutral-200'
+          } hover:text-neutral-50`}
+        >
+          Home
+        </Link>
         <button
           onClick={onSessionsClick}
           className={`cursor-pointer font-inter text-[13.6px] font-medium transition-colors ${
