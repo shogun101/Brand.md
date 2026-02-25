@@ -39,15 +39,17 @@ interface SidebarProps {
   onStartSession?: () => void;
   onAgentChange?: (id: string) => void;
   onModulesChange?: (activeModule: string) => void;
+  onUpgrade?: () => void;
   isSignedIn?: boolean;
   onSignIn?: () => void;
   isStarting?: boolean;
   micError?: string | null;
 }
 
-export default function Sidebar({ onStartSession, onAgentChange, onModulesChange, isSignedIn = false, onSignIn, isStarting = false, micError }: SidebarProps) {
+export default function Sidebar({ onStartSession, onAgentChange, onModulesChange, onUpgrade, isSignedIn = false, onSignIn, isStarting = false, micError }: SidebarProps) {
   const { selectedAgent, setAgent, setSelectedModule } = useSessionStore();
-  const { isFreeTrial } = useCredits();
+  const { isFreeTrial, credits } = useCredits();
+  const isOutOfCredits = isSignedIn && credits === 0;
   const [activeModule, setActiveModule] = useState<string>('positioning');
 
   const handleAgentSelect = (id: string) => {
@@ -64,13 +66,22 @@ export default function Sidebar({ onStartSession, onAgentChange, onModulesChange
   const ctaButton = (
     <div className="flex flex-col gap-2">
       {isSignedIn ? (
-        <button
-          onClick={onStartSession}
-          disabled={isStarting}
-          className="flex h-12 w-full items-center justify-center rounded-[46px] border border-white bg-neutral-50 font-awesome-serif text-base text-black transition-opacity hover:opacity-90 disabled:opacity-60"
-        >
-          {isStarting ? 'Starting...' : 'Start Session'}
-        </button>
+        isOutOfCredits ? (
+          <button
+            onClick={onUpgrade}
+            className="flex h-12 w-full items-center justify-center rounded-[46px] border border-white bg-neutral-50 font-awesome-serif text-base text-black transition-opacity hover:opacity-90"
+          >
+            Upgrade to Start
+          </button>
+        ) : (
+          <button
+            onClick={onStartSession}
+            disabled={isStarting}
+            className="flex h-12 w-full items-center justify-center rounded-[46px] border border-white bg-neutral-50 font-awesome-serif text-base text-black transition-opacity hover:opacity-90 disabled:opacity-60"
+          >
+            {isStarting ? 'Starting...' : 'Start Session'}
+          </button>
+        )
       ) : (
         <button
           onClick={onSignIn}

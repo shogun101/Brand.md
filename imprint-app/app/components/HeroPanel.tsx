@@ -15,6 +15,7 @@ interface HeroPanelProps {
   audioEnabled: boolean;
   onStartSession?: () => void;
   onNewSession?: () => void;
+  onUpgrade?: () => void;
   onToggleAudio?: () => void;
   /** Passed through to MicIndicator when session is active */
   isMuted?: boolean;
@@ -35,6 +36,7 @@ export default function HeroPanel({
   audioEnabled,
   onStartSession,
   onNewSession,
+  onUpgrade,
   onToggleAudio,
   isMuted,
   onToggleMute,
@@ -99,6 +101,7 @@ export default function HeroPanel({
         <FloatingBar
           agentName={agentName}
           onStartSession={onStartSession}
+          onUpgrade={onUpgrade}
           isSignedIn={isSignedIn}
           onSignIn={onSignIn}
         />

@@ -1,10 +1,12 @@
 'use client';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
+import { useCredits } from '@/lib/use-credits';
 
 interface FloatingBarProps {
   agentName?: string;
   onStartSession?: () => void;
   onNewSession?: () => void;
+  onUpgrade?: () => void;
   label?: string;
   isComplete?: boolean;
   isSignedIn?: boolean;
@@ -15,11 +17,14 @@ export default function FloatingBar({
   agentName = 'STRATEGIST',
   onStartSession,
   onNewSession,
+  onUpgrade,
   label,
   isComplete = false,
   isSignedIn = false,
   onSignIn,
 }: FloatingBarProps) {
+  const { credits } = useCredits();
+  const isOutOfCredits = isSignedIn && credits === 0;
   if (isComplete) {
     return (
       <div className="absolute inset-x-0 bottom-8 z-20 flex justify-center">
@@ -61,15 +66,24 @@ export default function FloatingBar({
             {label || agentName}
           </span>
         </div>
-        {/* CTA — auth gated */}
+        {/* CTA — auth + credits gated */}
         {isSignedIn ? (
-          onStartSession && (
+          isOutOfCredits ? (
             <button
-              onClick={onStartSession}
+              onClick={onUpgrade}
               className="flex h-8 items-center justify-center rounded-full bg-neutral-50 px-3 font-awesome-serif text-xs text-black shadow-[0px_2px_4px_0px_rgba(0,0,0,0.2)] transition-opacity hover:opacity-90"
             >
-              Start Session
+              Upgrade to Start
             </button>
+          ) : (
+            onStartSession && (
+              <button
+                onClick={onStartSession}
+                className="flex h-8 items-center justify-center rounded-full bg-neutral-50 px-3 font-awesome-serif text-xs text-black shadow-[0px_2px_4px_0px_rgba(0,0,0,0.2)] transition-opacity hover:opacity-90"
+              >
+                Start Session
+              </button>
+            )
           )
         ) : (
           <button

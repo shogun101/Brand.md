@@ -15,6 +15,7 @@ import LiveDocument from './components/LiveDocument';
 import SessionComplete from './components/SessionComplete';
 import { AmbientAudio } from './components/AmbientAudio';
 import AvatarCanvas from './components/AvatarCanvas';
+import BuyCreditsModal from './components/BuyCreditsModal';
 
 type ConversationHandle = {
   endSession?: () => Promise<void>;
@@ -41,6 +42,7 @@ export default function HomePage() {
   const [isPaused, setIsPaused] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
+  const [buyModalOpen, setBuyModalOpen] = useState(false);
   const conversationRef = useRef<ConversationHandle | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const sessionActiveRef = useRef(false);
@@ -146,6 +148,8 @@ export default function HomePage() {
   // ── Hydrate credits from Supabase when signed in ──────────────────────────
   useEffect(() => {
     if (!isSignedIn) return;
+    // Skip if we just came from a payment — addCredits handles it optimistically
+    if (new URLSearchParams(window.location.search).get('credits_added')) return;
     fetch('/api/credits')
       .then(r => r.json())
       .then((data: { credits?: number; maxCredits?: number; isFreeTrial?: boolean }) => {
@@ -513,6 +517,7 @@ export default function HomePage() {
             audioEnabled={audioEnabled}
             onStartSession={handleStartSession}
             onNewSession={handleNewSession}
+            onUpgrade={() => setBuyModalOpen(true)}
             onToggleAudio={toggleAudio}
             isMuted={isMuted}
             onToggleMute={handleToggleMute}
@@ -531,6 +536,7 @@ export default function HomePage() {
               onStartSession={handleStartSession}
               onAgentChange={() => {}}
               onModulesChange={() => {}}
+              onUpgrade={() => setBuyModalOpen(true)}
               isSignedIn={isSignedIn ?? false}
               onSignIn={() => openSignIn()}
             />
@@ -570,6 +576,7 @@ export default function HomePage() {
               onStartSession={handleStartSession}
               onAgentChange={() => {}}
               onModulesChange={() => {}}
+              onUpgrade={() => setBuyModalOpen(true)}
               isSignedIn={isSignedIn ?? false}
               onSignIn={() => openSignIn()}
               isStarting={isStarting}
@@ -615,6 +622,9 @@ export default function HomePage() {
           </div>
         )}
       </div>
+
+      {/* Buy Credits Modal — triggered from Sidebar/FloatingBar when credits=0 */}
+      <BuyCreditsModal isOpen={buyModalOpen} onClose={() => setBuyModalOpen(false)} />
     </div>
   );
 }
