@@ -23,6 +23,7 @@ interface BuyCreditsModalProps {
 
 export default function BuyCreditsModal({ isOpen, onClose }: BuyCreditsModalProps) {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Close on Escape key
   useEffect(() => {
@@ -36,14 +37,21 @@ export default function BuyCreditsModal({ isOpen, onClose }: BuyCreditsModalProp
 
   const handlePayNow = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const res = await fetch('/api/checkout', { method: 'POST' });
-      const data: { checkout_url?: string } = await res.json();
+      const data: { checkout_url?: string; error?: string } = await res.json();
       if (data.checkout_url) {
         window.location.href = data.checkout_url;
+      } else if (res.status === 401) {
+        setError('Please sign in to continue.');
+      } else {
+        setError(data.error ?? 'Checkout unavailable — please try again.');
+        console.error('[BuyCredits] No checkout_url in response:', data);
       }
     } catch (err) {
       console.error('[BuyCredits] Checkout failed:', err);
+      setError('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -170,6 +178,13 @@ export default function BuyCreditsModal({ isOpen, onClose }: BuyCreditsModalProp
                   </span>
                 </button>
               </div>
+
+              {/* Error message */}
+              {error && (
+                <p className="text-center font-inter text-[12px] font-normal leading-[16px] text-red-400">
+                  {error}
+                </p>
+              )}
 
               {/* Footer */}
               <p className="text-center font-inter text-[12px] font-normal leading-[16px] text-[#52525b]">
