@@ -54,7 +54,7 @@ export default function AgentCard({
       )}
 
       {/* Text labels — placed BEFORE gradient so they go behind blur when locked */}
-      <div className="absolute bottom-[16px] left-[11px] z-[1] flex w-[96px] flex-col items-start gap-[6px]">
+      <div className={`absolute bottom-[16px] left-[11px] ${locked ? 'z-[1]' : 'z-[3]'} flex w-[96px] flex-col items-start gap-[6px]`}>
         <span
           className={`w-full font-inter text-[13.6px] font-semibold ${
             selected && !locked ? 'text-neutral-50' : 'text-[rgba(237,237,237,0.72)]'
