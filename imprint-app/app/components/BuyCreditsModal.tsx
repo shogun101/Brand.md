@@ -24,6 +24,19 @@ interface BuyCreditsModalProps {
 export default function BuyCreditsModal({ isOpen, onClose }: BuyCreditsModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [view, setView] = useState<'purchase' | 'code'>('purchase');
+  const [promoInput, setPromoInput] = useState('');
+  const [appliedCode, setAppliedCode] = useState('');
+
+  // Reset all state when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setView('purchase');
+      setPromoInput('');
+      setAppliedCode('');
+      setError(null);
+    }
+  }, [isOpen]);
 
   // Close on Escape key
   useEffect(() => {
@@ -35,11 +48,24 @@ export default function BuyCreditsModal({ isOpen, onClose }: BuyCreditsModalProp
     return () => document.removeEventListener('keydown', handleKey);
   }, [isOpen, onClose]);
 
+  const handleApplyCode = useCallback(() => {
+    const code = promoInput.trim().toUpperCase();
+    if (!code) return;
+    setAppliedCode(code);
+    setView('purchase');
+  }, [promoInput]);
+
   const handlePayNow = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/checkout', { method: 'POST' });
+      const body: { discount_code?: string } = {};
+      if (appliedCode) body.discount_code = appliedCode;
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
       const data: { checkout_url?: string; error?: string } = await res.json();
       if (data.checkout_url) {
         window.location.href = data.checkout_url;
@@ -55,7 +81,7 @@ export default function BuyCreditsModal({ isOpen, onClose }: BuyCreditsModalProp
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [appliedCode]);
 
   if (!isOpen) return null;
 
@@ -70,6 +96,68 @@ export default function BuyCreditsModal({ isOpen, onClose }: BuyCreditsModalProp
       {/* Modal Card — Figma: 420×452, bg #09090b, rounded-24 */}
       <div className="relative z-10 w-[calc(100vw-32px)] max-w-[420px] rounded-[24px] border border-[rgba(42,42,42,0.44)] bg-[#09090b] p-[20px]">
         <div className="flex flex-col gap-[24px]">
+
+        {/* ── CODE VIEW ── */}
+        {view === 'code' && (
+          <>
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => setView('purchase')}
+                className="font-inter text-[13px] text-[rgba(237,237,237,0.5)] transition-opacity hover:opacity-70"
+              >
+                ← back
+              </button>
+              <button
+                onClick={onClose}
+                className="flex size-[20px] items-center justify-center transition-opacity hover:opacity-70"
+              >
+                <svg width={20} height={20} viewBox="0 0 20 20" fill="none">
+                  <path d="M15 5L5 15" stroke="#EDEDED" strokeOpacity={0.88} strokeWidth={1.66667} strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M5 5L15 15" stroke="#EDEDED" strokeOpacity={0.88} strokeWidth={1.66667} strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Icon + title */}
+            <div className="flex flex-col items-center gap-[12px] py-[8px]">
+              <svg width={32} height={32} viewBox="0 0 24 24" fill="none" stroke="rgba(237,237,237,0.5)" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+                <line x1="7" y1="7" x2="7.01" y2="7"/>
+              </svg>
+              <span className="font-inter text-[14px] font-semibold text-[rgba(237,237,237,0.88)]">
+                Redeem a code
+              </span>
+              <span className="font-inter text-[12px] text-[#71717a]">
+                enter a promo code for a discount
+              </span>
+            </div>
+
+            {/* Input */}
+            <input
+              type="text"
+              value={promoInput}
+              onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
+              onKeyDown={(e) => e.key === 'Enter' && handleApplyCode()}
+              placeholder="ENTER CODE"
+              className="h-[46px] w-full rounded-[12px] border border-[rgba(42,42,42,0.5)] bg-[#18181b] px-[16px] font-inter text-[13px] tracking-widest text-[rgba(237,237,237,0.88)] placeholder:text-[#52525b] outline-none focus:border-neutral-600"
+            />
+
+            {/* Apply button */}
+            <button
+              onClick={handleApplyCode}
+              disabled={!promoInput.trim()}
+              className="flex h-[46px] w-full items-center justify-center rounded-[38px] bg-[#e4e4e7] transition-opacity hover:opacity-90 disabled:opacity-40"
+            >
+              <span className="-translate-y-[2px] font-awesome-serif text-[20px] leading-none text-black">
+                apply
+              </span>
+            </button>
+          </>
+        )}
+
+        {/* ── PURCHASE VIEW ── */}
+        {view === 'purchase' && (<>
           {/* ── Header + Price ── */}
           <div className="flex flex-col gap-[36px]">
             {/* Title row */}
@@ -186,13 +274,27 @@ export default function BuyCreditsModal({ isOpen, onClose }: BuyCreditsModalProp
                 </p>
               )}
 
+              {/* Applied code indicator */}
+              {appliedCode && (
+                <p className="text-center font-inter text-[12px] font-normal leading-[16px] text-emerald-400">
+                  code applied: {appliedCode}
+                </p>
+              )}
+
               {/* Footer */}
               <p className="text-center font-inter text-[12px] font-normal leading-[16px] text-[#52525b]">
                 secured by dodo payments ·{' '}
-                <span className="underline decoration-solid">need help?</span>
+                <button
+                  onClick={() => { setView('code'); setError(null); }}
+                  className="underline decoration-solid hover:text-neutral-400 transition-colors"
+                >
+                  have a code?
+                </button>
               </p>
             </div>
           </div>
+        </>) }
+
         </div>
       </div>
     </div>

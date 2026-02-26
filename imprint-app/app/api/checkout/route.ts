@@ -5,13 +5,22 @@ import DodoPayments from 'dodopayments';
 const PRODUCT_ID = 'pdt_0NZFoV3kqgsjODi1gjf4G';
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://imprint-app-shogun.vercel.app';
 
-export async function POST() {
+export async function POST(req: Request) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const user = await currentUser();
   const email = user?.emailAddresses?.[0]?.emailAddress ?? '';
   const name = user?.fullName ?? '';
+
+  // Optional discount code — safe parse, won't break if body is empty
+  let discount_code: string | undefined;
+  try {
+    const body = await req.json();
+    if (body?.discount_code) discount_code = String(body.discount_code);
+  } catch {
+    // No body or invalid JSON — proceed without discount
+  }
 
   const dodo = new DodoPayments({
     bearerToken: process.env.DODO_PAYMENTS_API_KEY!,
@@ -32,6 +41,7 @@ export async function POST() {
       payment_link: true,
       product_cart: [{ product_id: PRODUCT_ID, quantity: 1 }],
       return_url: `${APP_URL}/api/checkout/success`,
+      ...(discount_code ? { discount_code } : {}),
     });
 
     console.log('[Checkout] Dodo response payment_id:', payment.payment_id, '| payment_link:', payment.payment_link ?? 'NULL');
