@@ -27,7 +27,7 @@ export default function Navbar({ activeLink, onSessionsClick }: NavbarProps) {
         href="/"
         className="font-awesome-serif text-[18px] text-white transition-opacity hover:opacity-80"
       >
-        Brand.md
+        BrandSprint.md
       </Link>
 
       {/* Right links + avatar */}
