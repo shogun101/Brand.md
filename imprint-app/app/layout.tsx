@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     siteName: 'BrandSprint',
     images: [
       {
-        url: 'https://brandsprint.app/og-image.png',
+        url: 'https://brandsprint.app/og-image.jpg',
         width: 4072,
         height: 2160,
         alt: 'BrandSprint',
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'BrandSprint',
     description: 'Have one conversation and walk away with a complete brand kit your AI tools can actually use.',
-    images: ['https://brandsprint.app/og-image.png'],
+    images: ['https://brandsprint.app/og-image.jpg'],
   },
 };
 
