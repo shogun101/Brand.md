@@ -28,17 +28,22 @@ export default function BuyCreditsModal({ isOpen, onClose, initialView = 'purcha
   const [view, setView] = useState<'purchase' | 'code'>(initialView);
   const [promoInput, setPromoInput] = useState('');
   const [appliedCode, setAppliedCode] = useState('');
+  const [displayPrice, setDisplayPrice] = useState('$29');
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   // Reset all state when modal opens or closes — respect initialView on open
   useEffect(() => {
     if (isOpen) {
       setView(initialView);
       setPromoInput('');
+      setDisplayPrice('$29');
       setError(null);
     } else {
       setView('purchase');
       setPromoInput('');
       setAppliedCode('');
+      setDisplayPrice('$29');
+      setPreviewLoading(false);
       setError(null);
     }
   }, [isOpen, initialView]);
@@ -53,11 +58,28 @@ export default function BuyCreditsModal({ isOpen, onClose, initialView = 'purcha
     return () => document.removeEventListener('keydown', handleKey);
   }, [isOpen, onClose]);
 
-  const handleApplyCode = useCallback(() => {
+  const handleApplyCode = useCallback(async () => {
     const code = promoInput.trim().toUpperCase();
     if (!code) return;
     setAppliedCode(code);
     setView('purchase');
+    // Preview discounted price — graceful degradation if it fails
+    setPreviewLoading(true);
+    try {
+      const res = await fetch('/api/checkout/preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ discount_code: code }),
+      });
+      if (res.ok) {
+        const data: { displayPrice?: string } = await res.json();
+        if (data.displayPrice !== undefined) setDisplayPrice(data.displayPrice);
+      }
+    } catch {
+      // Keep showing $29 — checkout will still apply the discount
+    } finally {
+      setPreviewLoading(false);
+    }
   }, [promoInput]);
 
   const handlePayNow = useCallback(async () => {
@@ -203,8 +225,8 @@ export default function BuyCreditsModal({ isOpen, onClose, initialView = 'purcha
 
             {/* Price + subtitle */}
             <div className="flex flex-col items-center gap-[36px]">
-              <p className="font-awesome-serif text-[64px] font-bold leading-[48px] text-[#e4e4e7]">
-                $29
+              <p className="font-awesome-serif text-[64px] font-bold leading-[48px] text-[#e4e4e7] transition-opacity duration-200" style={{ opacity: previewLoading ? 0.4 : 1 }}>
+                {displayPrice}
               </p>
               <div className="flex items-center gap-[10px]">
                 <span className="font-inter text-[14px] font-semibold uppercase text-[rgba(237,237,237,0.72)]">
