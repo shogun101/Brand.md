@@ -173,11 +173,11 @@ export default function BuyCreditsModal({ isOpen, onClose, initialView = 'purcha
             {/* Apply button */}
             <button
               onClick={handleApplyCode}
-              disabled={!promoInput.trim()}
+              disabled={!promoInput.trim() || previewLoading}
               className="flex h-[46px] w-full items-center justify-center rounded-[38px] bg-[#e4e4e7] transition-opacity hover:opacity-90 disabled:opacity-40"
             >
               <span className="-translate-y-[2px] font-awesome-serif text-[20px] leading-none text-black">
-                apply
+                {previewLoading ? 'checking...' : 'apply'}
               </span>
             </button>
           </>
