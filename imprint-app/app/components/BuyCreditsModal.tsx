@@ -282,15 +282,16 @@ export default function BuyCreditsModal({ isOpen, onClose }: BuyCreditsModalProp
               )}
 
               {/* Footer */}
-              <p className="text-center font-inter text-[12px] font-normal leading-[16px] text-[#52525b]">
-                secured by dodo payments ·{' '}
+              <div className="flex items-center justify-center gap-[6px] font-inter text-[12px] font-normal leading-[16px] text-[#52525b]">
+                <span>secured by dodo payments</span>
+                <span>·</span>
                 <button
                   onClick={() => { setView('code'); setError(null); }}
-                  className="underline decoration-solid hover:text-neutral-400 transition-colors"
+                  className="underline decoration-solid hover:text-neutral-400 transition-colors cursor-pointer"
                 >
                   have a code?
                 </button>
-              </p>
+              </div>
             </div>
           </div>
         </>) }
