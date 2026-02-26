@@ -19,24 +19,29 @@ import { useState, useCallback, useEffect } from 'react';
 interface BuyCreditsModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialView?: 'purchase' | 'code';
 }
 
-export default function BuyCreditsModal({ isOpen, onClose }: BuyCreditsModalProps) {
+export default function BuyCreditsModal({ isOpen, onClose, initialView = 'purchase' }: BuyCreditsModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [view, setView] = useState<'purchase' | 'code'>('purchase');
+  const [view, setView] = useState<'purchase' | 'code'>(initialView);
   const [promoInput, setPromoInput] = useState('');
   const [appliedCode, setAppliedCode] = useState('');
 
-  // Reset all state when modal closes
+  // Reset all state when modal opens or closes — respect initialView on open
   useEffect(() => {
-    if (!isOpen) {
+    if (isOpen) {
+      setView(initialView);
+      setPromoInput('');
+      setError(null);
+    } else {
       setView('purchase');
       setPromoInput('');
       setAppliedCode('');
       setError(null);
     }
-  }, [isOpen]);
+  }, [isOpen, initialView]);
 
   // Close on Escape key
   useEffect(() => {

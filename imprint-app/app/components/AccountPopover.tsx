@@ -16,6 +16,7 @@ interface AccountPopoverProps {
   isOpen: boolean;
   onClose: () => void;
   onUpgrade: () => void;
+  onRedeemCode?: () => void;
   onSignOut?: () => void;
 }
 
@@ -23,6 +24,7 @@ export default function AccountPopover({
   isOpen,
   onClose,
   onUpgrade,
+  onRedeemCode,
   onSignOut,
 }: AccountPopoverProps) {
   const ref = useRef<HTMLDivElement>(null);
@@ -103,7 +105,10 @@ export default function AccountPopover({
           </button>
 
           {/* Have a code? */}
-          <button className="flex h-[28px] w-full items-center justify-center gap-[6px] transition-opacity hover:opacity-80">
+          <button
+            onClick={() => { onClose(); onRedeemCode?.(); }}
+            className="flex h-[28px] w-full items-center justify-center gap-[6px] transition-opacity hover:opacity-80"
+          >
             {/* Gift icon */}
             <svg
               width={12}

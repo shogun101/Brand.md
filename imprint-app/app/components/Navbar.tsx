@@ -17,6 +17,7 @@ export default function Navbar({ activeLink, onSessionsClick }: NavbarProps) {
   const { isSignedIn } = useAuth();
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [modalView, setModalView] = useState<'purchase' | 'code'>('purchase');
   const { credits, maxCredits, isFreeTrial } = useCredits();
 
   return (
@@ -60,7 +61,8 @@ export default function Navbar({ activeLink, onSessionsClick }: NavbarProps) {
               <AccountPopover
                 isOpen={popoverOpen}
                 onClose={() => setPopoverOpen(false)}
-                onUpgrade={() => { setPopoverOpen(false); setModalOpen(true); }}
+                onUpgrade={() => { setPopoverOpen(false); setModalView('purchase'); setModalOpen(true); }}
+                onRedeemCode={() => { setPopoverOpen(false); setModalView('code'); setModalOpen(true); }}
               />
             </div>
             <UserButton afterSignOutUrl="/" />
@@ -74,7 +76,7 @@ export default function Navbar({ activeLink, onSessionsClick }: NavbarProps) {
         )}
       </div>
     </nav>
-    <BuyCreditsModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
+    <BuyCreditsModal isOpen={modalOpen} onClose={() => setModalOpen(false)} initialView={modalView} />
     </>
   );
 }
