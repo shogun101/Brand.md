@@ -440,6 +440,8 @@ export default function HomePage() {
     const storeState = useSessionStore.getState();
     setState('complete');
     consumeCredit();
+    // Persist decrement to Supabase — prevents sign-out bypass
+    fetch('/api/credits', { method: 'PATCH' }).catch(console.error);
     storeState.setGeneratingKit(true);
     try {
       const res = await fetch('/api/generate-kit', {

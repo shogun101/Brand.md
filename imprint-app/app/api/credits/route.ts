@@ -32,3 +32,33 @@ export async function GET() {
     isFreeTrial: data?.is_free_trial ?? true,
   });
 }
+
+// Decrement credits by 1 — called server-side after a session completes
+// Prevents sign-out bypass where Zustand resets but Supabase still shows credits: 1
+export async function PATCH() {
+  const { userId } = await auth();
+  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
+  const { data } = await supabase
+    .from('user_credits')
+    .select('credits, is_free_trial')
+    .eq('user_id', userId)
+    .single();
+
+  if (!data) return NextResponse.json({ error: 'No credits record' }, { status: 404 });
+
+  const newCredits = Math.max(0, data.credits - 1);
+  const newIsFreeTrial = newCredits === 0 ? false : data.is_free_trial;
+
+  await supabase
+    .from('user_credits')
+    .update({ credits: newCredits, is_free_trial: newIsFreeTrial })
+    .eq('user_id', userId);
+
+  return NextResponse.json({ credits: newCredits, isFreeTrial: newIsFreeTrial });
+}
