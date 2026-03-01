@@ -427,11 +427,19 @@ export default function HomePage() {
     setIsPaused(false);
     setIsMuted(false);
     const conv = conversationRef.current;
-    if (conv?.endSession) {
-      await conv.endSession();
-    } else if (conv?._recognition) {
-      conv._recognition.stop();
-    }
+    conversationRef.current = null; // prevent any reuse
+    try {
+      if (conv?.endSession) {
+        await conv.endSession();
+      } else if (conv?._recognition) {
+        conv._recognition.stop();
+      }
+    } catch { /* endSession failed — still proceed with hard mic kill */ }
+    // Hard kill: stop any mic tracks the SDK may have left open
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(t => t.stop());
+    } catch { /* mic already released — no-op */ }
     setMicState('READY');
 
     // ── Generate full brand kit via GPT-4o ────────────────────────────────
