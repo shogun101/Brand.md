@@ -371,6 +371,7 @@ export default function HomePage() {
     }
   }, [
     selectedAgent,
+    selectedModules,
     setState,
     setMicState,
     setMicError,
